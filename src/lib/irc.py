@@ -36,8 +36,7 @@ class irc:
 	def check_login_status(self, data):
 		if re.match(r'^:(testserver\.local|tmi\.twitch\.tv) NOTICE \* :Login unsuccessful\r\n$', data):
 			return False
-		else:
-			return True
+		else: return True
 
 	def send_message(self, channel, message):
 		self.sock.send('PRIVMSG %s :%s\n' % (channel, message.encode('utf-8')))
@@ -45,7 +44,6 @@ class irc:
 	def get_irc_socket_object(self):
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		sock.settimeout(10)
-
 		self.sock = sock
 
 		try:
@@ -55,7 +53,6 @@ class irc:
 			sys.exit()
 
 		sock.settimeout(None)
-
 		sock.send('USER %s\r\n' % self.config['username'])
 		sock.send('PASS %s\r\n' % self.config['oauth_password'])
 		sock.send('NICK %s\r\n' % self.config['username'])
@@ -66,14 +63,13 @@ class irc:
 			pp('Login unsuccessful. (hint: make sure your oauth token is set in self.config/self.config.py).', 'error')
 			sys.exit()
 
-		# start threads for channels that have cron messages to run
+		# Start threads for channels that have cron messages to run
 		for channel in self.config['channels']:
 			if channel in self.config['cron']:
 				if self.config['cron'][channel]['run_cron']:
 					thread.start_new_thread(cron.cron(self, channel).run, ())
 
 		self.join_channels(self.channels_to_string(self.config['channels']))
-
 		return sock
 
 	def channels_to_string(self, channel_list):

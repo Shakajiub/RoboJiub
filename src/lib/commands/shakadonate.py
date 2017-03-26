@@ -1,7 +1,7 @@
 from src.lib.functions_points import *
 
 def shakadonate(viewer, args):
-	usage = '!shakadonate <user> <amount>'
+	#usage = '!shakadonate <user> <amount>'
 	recipient = args[0].lower()
 
 	if not check_viewer_exists(recipient):
@@ -9,7 +9,6 @@ def shakadonate(viewer, args):
 
 	if not args[1].isdigit():
 		return "that's not an integer!"
-
 	points_amount = int(args[1])
 
 	if get_viewer_points_raw(viewer) < points_amount:

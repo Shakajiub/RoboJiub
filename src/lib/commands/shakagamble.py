@@ -1,8 +1,8 @@
-import random
+from random import randrange
 from src.lib.functions_points import *
 
 def shakagamble(viewer, args):
-	usage = '!shakagamble <points>'
+	#usage = '!shakagamble <points>'
 
 	if not args[0].isdigit():
 		return "that's not an integer!"
@@ -16,9 +16,9 @@ def shakagamble(viewer, args):
 	# <3
 	if viewer == 'papercat84':
 		award_viewer(viewer, -gamble_amount)
-		return 'rolled %s, lost %s points!' % (random.randrange(1, 59), gamble_amount)
+		return 'rolled %s, lost %s points!' % (randrange(1, 59), gamble_amount)
 
-	random_roll = random.randrange(1, 100)
+	random_roll = randrange(1, 100)
 	if random_roll > 59:
 		award_viewer(viewer, gamble_amount)
 		return 'rolled %s, won %s points, now has %s points!' % (random_roll, gamble_amount * 2, viewer_points + gamble_amount)

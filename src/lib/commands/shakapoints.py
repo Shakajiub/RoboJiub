@@ -1,5 +1,5 @@
-from src.lib.functions_points import *
+from src.lib.functions_points import get_viewer_points
 
 def shakapoints(viewer):
-	usage = '!shakapoints'
+	#usage = '!shakapoints'
 	return get_viewer_points(viewer)

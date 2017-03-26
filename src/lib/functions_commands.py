@@ -30,7 +30,6 @@ def check_has_return(command):
 def get_return(command):
 	return commands[command]['return']
 
-
 def check_has_args(command):
 	if 'argc' in commands[command]:
 		return True
@@ -50,9 +49,5 @@ def pass_to_function(command, username, args):
 	module = importlib.import_module('src.lib.commands.%s' % command)
 	function = getattr(module, command)
 
-	if args:
-		# need to reference to src.lib.commands.<command
-		return function(username, args)
-	else:
-		# need to reference to src.lib.commands.<command
-		return function(username)
+	if args: return function(username, args)
+	else: return function(username)

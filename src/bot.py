@@ -1,9 +1,3 @@
-"""
-Simple IRC Bot for Twitch.tv
-
-Developed by Aidan Thomson <aidraj0@gmail.com>
-"""
-
 import lib.irc as irc_
 from lib.functions_general import *
 import lib.functions_commands as commands
@@ -14,7 +8,6 @@ class Roboraj:
 		self.config = config
 		self.irc = irc_.irc(config)
 		self.socket = self.irc.get_irc_socket_object()
-
 
 	def run(self):
 		irc = self.irc
@@ -31,7 +24,7 @@ class Roboraj:
 			if config['debug']:
 				print data
 
-			# check for ping, reply with pong
+			# Check for ping, reply with pong
 			irc.check_for_ping(data)
 
 			if irc.check_for_message(data):
@@ -43,7 +36,7 @@ class Roboraj:
 
 				ppi(channel, message, username)
 
-				# check if message is a command with no arguments
+				# Check if message is a command with no arguments
 				if commands.is_valid_command(message) or commands.is_valid_command(message.split(' ')[0]):
 					command = message
 

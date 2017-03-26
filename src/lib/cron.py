@@ -1,7 +1,7 @@
 import time
 from src.config.config import *
 from functions_general import *
-from functions_points import *
+from functions_points import award_all_viewers
 
 class cron:
 
@@ -14,12 +14,10 @@ class cron:
 
 	def get_next_message(self):
 		next_index = self.last_index + 1
-
 		if next_index > len(self.messages) - 1:
 			next_index = 0
 
 		self.last_index = next_index
-
 		return next_index
 
 	def run(self):
@@ -27,13 +25,10 @@ class cron:
 
 		while True:
 			index = self.get_next_message()
-
 			pbot('[CRON] %s' % self.messages[index], self.channel)
 
+			award_all_viewers() # TODO make this not run on EACH cronjob
+
 			#self.irc.send_message(self.channel, self.messages[index])
-
 			self.last_ran = time.time()
-
-			award_all_viewers()
-
 			time.sleep(self.run_time)
