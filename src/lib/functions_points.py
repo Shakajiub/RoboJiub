@@ -1,6 +1,7 @@
 import os
 import json
 from urllib2 import urlopen
+from src.config.config import *
 
 # Check if the given viewer exists
 def check_viewer_exists(viewer):
@@ -30,16 +31,19 @@ def award_viewer(viewer, amount):
 	f.close()
 
 # Award all viewers with some points
-def award_all_viewers():
-	response = urlopen('http://tmi.twitch.tv/group/user/shakajiub/chatters')
-	parsed_json = json.loads(response.read())
+def award_all_viewers(amount):
+	for channel in config['channels']:
+		channel = channel.replace('#','')
+		
+		response = urlopen('http://tmi.twitch.tv/group/user/%s/chatters' % channel)
+		parsed_json = json.loads(response.read())
 
-	for category in parsed_json['chatters']:
-		#print("\r\n" + category + ":")
-		for viewer in parsed_json['chatters'][category]:
-			#print(viewer)
-			award_viewer(viewer, 1)
-			#print("awarding " + viewer)
+		for category in parsed_json['chatters']:
+			#print("\r\n" + category + ":")
+			for viewer in parsed_json['chatters'][category]:
+				#print(viewer)
+				award_viewer(viewer, amount)
+				#print("awarding " + viewer)
 
 # Get the amount of points a viewer has
 def get_viewer_points(viewer):

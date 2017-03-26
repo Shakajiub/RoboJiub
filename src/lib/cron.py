@@ -27,7 +27,7 @@ class cron:
 			index = self.get_next_message()
 			pbot('[CRON] %s' % self.messages[index], self.channel)
 
-			award_all_viewers() # TODO make this not run on EACH cronjob
+			award_all_viewers(1) # TODO make this not run on EACH cronjob
 
 			#self.irc.send_message(self.channel, self.messages[index])
 			self.last_ran = time.time()

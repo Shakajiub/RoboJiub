@@ -17,6 +17,12 @@ commands = {
 		'limit': 1,
 		'argc': 2,
 		'return': 'command'
+	},
+
+	'!shakatimer': {
+		'limit': 1,
+		'argc': 1,
+		'return': 'command'
 	}
 }
 

@@ -2,7 +2,7 @@ import lib.irc as irc_
 from lib.functions_general import *
 import lib.functions_commands as commands
 
-class Roboraj:
+class RoboJiub:
 
 	def __init__(self, config):
 		self.config = config
