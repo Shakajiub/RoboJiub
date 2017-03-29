@@ -1,3 +1,5 @@
+# https://github.com/aidanrwt/twitch-bot
+
 import re
 import socket
 
@@ -41,28 +43,28 @@ class IRC:
 		}
 
 	def get_irc_socket_object(self):
-		global config
+		config = get_config()
 
 		sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		sock.settimeout(10)
 		self.sock = sock
 
 		try:
-			sock.connect((config['server'], config['port']))
+			sock.connect((config['irc']['server'], config['irc']['port']))
 		except:
-			self.queue.put(('Cannot connect to server (%s:%s)' % (config['server'], config['port']), 'BG_error'))
+			self.queue.put(('Cannot connect to server (%s:%s)' % (config['irc']['server'], config['irc']['port']), 'BG_error'))
 			return None
 
 		sock.settimeout(None)
-		sock.send('USER %s\r\n' % config['username'])
-		sock.send('PASS %s\r\n' % config['oauth_password'])
-		sock.send('NICK %s\r\n' % config['username'])
+		sock.send('USER %s\r\n' % config['irc']['username'])
+		sock.send('PASS %s\r\n' % config['irc']['oauth_password'])
+		sock.send('NICK %s\r\n' % config['irc']['username'])
 
 		if self.check_login_status(sock.recv(1024)):
-			self.queue.put(('Login successful, joining channel: %s' % config['channel'], 'BG_success'))
+			self.queue.put(('Login successful, joining channel: %s' % config['irc']['channel'], 'BG_success'))
 		else:
 			self.queue.put(('Login failed! (possibly invalid oauth token)', 'BG_error'))
 			return None
 
-		self.sock.send('JOIN %s\r\n' % config['channel'])
+		self.sock.send('JOIN %s\r\n' % config['irc']['channel'])
 		return sock

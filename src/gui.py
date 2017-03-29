@@ -84,9 +84,9 @@ class RoboGUI:
 				pass
 
 	def manual_post(self):
-		global config
+		config = get_config()
 		log_msg = self.manual_text_box.get('1.0', tk.END).replace('\n', ' ')
 
 		self.queue.put(('[robojiub]: %s' % log_msg, 'BG_chat'))
-		self.irc.send_message(config['channel'], log_msg)
+		self.irc.send_message(config['irc']['channel'], log_msg)
 		self.manual_text_box.delete('1.0', tk.END)

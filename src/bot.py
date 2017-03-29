@@ -31,7 +31,7 @@ class RoboJiub:
 			self.thread_main.start()
 		else:
 			self.connected = 0
-			self.queue.put(('Disconnecting from the channel...', 'BG_progress'))
+			self.queue.put(('Disconnecting from the channel ...', 'BG_progress'))
 			self.irc.end_connection()
 
 		self.gui.toggle_bot_button(self.connected)
@@ -55,7 +55,7 @@ class RoboJiub:
 		self.running = 0
 
 	def robo_main(self):
-		global config
+		config = get_config()
 
 		irc = self.irc
 		sock = self.socket
@@ -65,7 +65,7 @@ class RoboJiub:
 			data = sock.recv(1024)
 
 			if len(data) == 0:
-				queue.put(('Connection was lost, reconnecting', 'BG_error'))
+				queue.put(('Connection was lost, reconnecting ...', 'BG_progress'))
 				sock = self.irc.get_irc_socket_object()
 
 			irc.check_for_ping(data)
@@ -77,6 +77,6 @@ class RoboJiub:
 				message = message_dict['message']
 				username = message_dict['username']
 
-				if username != config['username'].lower():
+				if username != config['irc']['username'].lower():
 					log_msg = '[%s]: %s' % (username, message)
 					queue.put((log_msg[:-1], 'BG_chat'))
