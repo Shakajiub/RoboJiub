@@ -3,7 +3,7 @@
 		"server": "irc.twitch.tv",
 		"port": 6667,
 		"channel": "#shakajiub",
-		"username": "RoboJiub",
+		"username": "robojiub",
 		"oauth_password": "oauth:"
 	},
 	"commands": {
