@@ -6,10 +6,21 @@
 		"username": "robojiub",
 		"oauth_password": "oauth:"
 	},
+	"messages": {
+		"greeting": "RoboJiub activated CoolCat",
+		"goodbye": "RoboJiub deactivated"
+	},
 	"commands": {
 		"ping": {
-			"enable": true,
-			"usage": "'!ping'"
+			"enabled": true,
+			"usage": "!ping"
+		}
+	},
+	"cron": {
+		"example": {
+			"enabled": true,
+			"message": "This message should appear every 20 seconds (as long as there are other messages in between)",
+			"timer": 20
 		}
 	}
 }

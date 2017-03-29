@@ -53,6 +53,9 @@ class RoboGUI:
 		self.manual_text_box.pack(anchor=tk.W, side=tk.LEFT, padx=10, pady=10)
 
 	def toggle_bot_button(self, toggle):
+		"""
+		TODO description
+		"""
 		if toggle:
 			self.button_toggle_bot.configure(text='Disconnect')
 		else: self.button_toggle_bot.configure(text='Connect')
@@ -84,6 +87,9 @@ class RoboGUI:
 				pass
 
 	def manual_post(self):
+		"""
+		TODO description
+		"""
 		config = get_config()
 		log_msg = self.manual_text_box.get('1.0', tk.END).replace('\n', ' ')
 

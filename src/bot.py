@@ -16,33 +16,74 @@ class RoboJiub:
 		self.queue = Queue.Queue()
 
 		self.irc = IRC(self.queue)
-		self.socket = None
-		self.thread_main = None
 		self.gui = RoboGUI(master, self.queue, self.irc, self.end_application, self.toggle_bot)
 
 		self.running = 1
 		self.connected = 0
+		self.cron_value = 1 # Has to be high enough for cron messages
 
 		self.periodic_loop()
 
+	def end_application(self):
+		"""
+		Toggle flags to disconnect the irc socket and close the window
+		"""
+		self.connected = 0
+		self.running = 0
+
 	def toggle_bot(self):
+		"""
+		Connect/disconnect the irc socket
+		"""
 		if not self.connected:
+			self.load_crons()
 			self.connected = 1
 			self.socket = self.irc.get_irc_socket_object()
-			self.thread_main = threading.Thread(target=self.robo_main)
-			self.thread_main.start()
+			thread_main = threading.Thread(target=self.robo_main)
+			thread_main.start()
 		else:
 			self.connected = 0
 			self.queue.put(('Disconnecting from the channel ...', 'BG_progress'))
 			self.irc.end_connection()
 
+		# Forward the connection status to the Tkinter GUI
 		self.gui.toggle_bot_button(self.connected)
+
+	def load_crons(self):
+		"""
+		TODO description
+		"""
+		config = get_config(True)
+		self.crons = {}
+
+		for cron in config["cron"]:
+			new_cron = config["cron"][cron]
+			if new_cron["enabled"]:
+				self.crons[cron] = [new_cron["timer"] * 10, 0]
+
+	def update_crons(self):
+		"""
+		TODO description
+		"""
+		if self.connected:
+			for cron in self.crons:
+				cron_timer = self.crons[cron]
+				cron_timer[1] += 1
+
+				if (cron_timer[1] >= cron_timer[0]):
+					cron_timer[1] = 0
+					cron_message = get_config()["cron"][cron]["message"]
+
+					self.cron_value = 0
+					self.queue.put((cron_message, 'BG_chat'))
+					self.irc.send_message(cron_message)
 
 	def periodic_loop(self):
 		"""
-		Check if there is anything new in the queue
+		TODO description
 		"""
 		self.gui.process_incoming()
+
 		if not self.running:
 			self.master.destroy()
 
@@ -50,13 +91,15 @@ class RoboJiub:
 			pid = os.getpid() # TODO figure out a better way to exit
 			os.kill(pid, 9)   # while waiting for the socket.recv()
 
+		elif self.cron_value > 0:
+			self.update_crons()
+
 		self.master.after(100, self.periodic_loop)
 
-	def end_application(self):
-		self.connected = 0
-		self.running = 0
-
 	def robo_main(self):
+		"""
+		TODO description
+		"""
 		config = get_config()
 
 		irc = self.irc
@@ -79,16 +122,18 @@ class RoboJiub:
 				message = message_dict['message']
 				username = message_dict['username']
 
-				if username != config['irc']['username'].lower():
+				if username != config['irc']['username']:
 					log_msg = '[%s]: %s' % (username, message)
 					queue.put((log_msg[:-1], 'BG_chat'))
+
+					self.cron_value = 1 # TODO better requirements for cron
 
 					if message[0] == '!':
 						try:
 							command_name = message.replace('!', '')[:-1].split(' ')[0]
 							args = (irc, queue, message.split(' '))
 
-							if (config["commands"][command_name]["enable"]):
+							if (config["commands"][command_name]["enabled"]):
 								module = importlib.import_module('src.commands.%s' % command_name)
 								result = getattr(module, command_name)(args)
 

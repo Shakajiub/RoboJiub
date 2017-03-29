@@ -14,6 +14,8 @@ class IRC:
 
 	def end_connection(self):
 		try:
+			config = get_config()
+			self.send_message(config["messages"]["goodbye"])
 			self.sock.close()
 			#self.queue.put(('Disconnected', 'BG_success'))
 		except: pass
@@ -69,4 +71,5 @@ class IRC:
 			return None
 
 		self.sock.send('JOIN %s\r\n' % config['irc']['channel'])
+		self.send_message(config["messages"]["greeting"])
 		return sock
