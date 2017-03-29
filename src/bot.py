@@ -1,8 +1,10 @@
 import Queue
 import threading
+import importlib
 
 from src.irc import *
 from src.gui import *
+from src.commands import *
 from src.config.config import *
 
 class RoboJiub:
@@ -80,3 +82,29 @@ class RoboJiub:
 				if username != config['irc']['username'].lower():
 					log_msg = '[%s]: %s' % (username, message)
 					queue.put((log_msg[:-1], 'BG_chat'))
+
+					if message[0] == '!':
+						try:
+							command_name = message.replace('!', '')[:-1].split(' ')[0]
+							args = (irc, queue, message.split(' '))
+
+							if (config["commands"][command_name]["enable"]):
+								module = importlib.import_module('src.commands.%s' % command_name)
+								result = getattr(module, command_name)(args)
+
+								if not result:
+									result = 'Usage: %s' % config["commands"][command_name]["usage"]
+
+								queue.put(('[robojiub]: %s' % result, 'BG_chat'))
+								irc.send_message(result)
+
+							else: print 'User tried to call disabled command: %s' % command_name
+
+						except ImportError:
+							print 'Could not import module: %s' % command_name
+
+						except AttributeError:
+							print 'No proper method found in module: %s' % command_name
+
+						except KeyError:
+							print 'Command not defined in config json: %s' % command_name

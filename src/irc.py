@@ -31,8 +31,10 @@ class IRC:
 			return False
 		else: return True
 
-	def send_message(self, channel, message):
-		try: self.sock.send('PRIVMSG %s :%s\n' % (channel, message.encode('utf-8')))
+	def send_message(self, message):
+		config = get_config()
+
+		try: self.sock.send('PRIVMSG %s :%s\n' % (config['irc']['channel'], message.encode('utf-8')))
 		except: pass
 
 	def get_message(self, data):

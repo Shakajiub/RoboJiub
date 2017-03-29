@@ -5,5 +5,11 @@
 		"channel": "#shakajiub",
 		"username": "RoboJiub",
 		"oauth_password": "oauth:"
+	},
+	"commands": {
+		"ping": {
+			"enable": true,
+			"usage": "'!ping'"
+		}
 	}
 }
