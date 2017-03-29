@@ -1,86 +1,82 @@
-import lib.irc as irc_
-from lib.functions_general import *
-import lib.functions_commands as commands
+import Queue
+import threading
+
+from src.irc import *
+from src.gui import *
+from src.config.config import *
 
 class RoboJiub:
+	"""
+	TODO description
+	"""
+	def __init__(self, master):
+		self.master = master
+		self.queue = Queue.Queue()
 
-	def __init__(self, config):
-		self.config = config
-		self.irc = irc_.irc(config)
-		self.socket = self.irc.get_irc_socket_object()
+		self.irc = IRC(self.queue)
+		self.socket = None
+		self.thread_main = None
+		self.gui = RoboGUI(master, self.queue, self.irc, self.end_application, self.toggle_bot)
 
-	def run(self):
+		self.running = 1
+		self.connected = 0
+
+		self.periodic_loop()
+
+	def toggle_bot(self):
+		if not self.connected:
+			self.connected = 1
+			self.socket = self.irc.get_irc_socket_object()
+			self.thread_main = threading.Thread(target=self.robo_main)
+			self.thread_main.start()
+		else:
+			self.connected = 0
+			self.queue.put(('Disconnecting from the channel...', 'BG_progress'))
+			self.irc.end_connection()
+
+		self.gui.toggle_bot_button(self.connected)
+
+	def periodic_loop(self):
+		"""
+		Check if there is anything new in the queue
+		"""
+		self.gui.process_incoming()
+		if not self.running:
+			self.master.destroy()
+
+			import os
+			pid = os.getpid() # TODO figure out a better way to exit
+			os.kill(pid, 9)   # while waiting for the socket.recv()
+
+		self.master.after(100, self.periodic_loop)
+
+	def end_application(self):
+		self.connected = 0
+		self.running = 0
+
+	def robo_main(self):
+		global config
+
 		irc = self.irc
 		sock = self.socket
-		config = self.config
+		queue = self.queue
 
-		while True:
-			data = sock.recv(config['socket_buffer_size']).rstrip()
+		while self.connected:
+			data = sock.recv(1024)
 
 			if len(data) == 0:
-				pp('Connection was lost, reconnecting.')
+				queue.put(('Connection was lost, reconnecting', 'BG_error'))
 				sock = self.irc.get_irc_socket_object()
 
-			if config['debug']:
-				print data
-
-			# Check for ping, reply with pong
 			irc.check_for_ping(data)
 
-			if irc.check_for_message(data):
+			if (irc.check_for_message(data)):
 				message_dict = irc.get_message(data)
 
-				channel = message_dict['channel']
+				#channel = message_dict['channel']
 				message = message_dict['message']
 				username = message_dict['username']
 
-				ppi(channel, message, username)
-
-				# Check if message is a command with no arguments
-				if commands.is_valid_command(message) or commands.is_valid_command(message.split(' ')[0]):
-					command = message
-
-					if commands.check_returns_function(command.split(' ')[0]):
-						if commands.check_has_correct_args(command, command.split(' ')[0]):
-							args = command.split(' ')
-							del args[0]
-
-							command = command.split(' ')[0]
-
-							if commands.is_on_cooldown(command, channel):
-								pbot('Command is on cooldown. (%s) (%s) (%ss remaining)' % (
-									command, username, commands.get_cooldown_remaining(command, channel)),
-									channel
-								)
-							else:
-								pbot('Command is valid and not on cooldown. (%s) (%s)' % (
-									command, username),
-									channel
-								)
-
-								result = commands.pass_to_function(command, username, args)
-								commands.update_last_used(command, channel)
-
-								if result:
-									resp = '%s %s' % (username, result)
-									pbot(resp, channel)
-									irc.send_message(channel, resp)
-
-					else:
-						if commands.is_on_cooldown(command, channel):
-							pbot('Command is on cooldown. (%s) (%s) (%ss remaining)' % (
-									command, username, commands.get_cooldown_remaining(command, channel)),
-									channel
-							)
-						elif commands.check_has_return(command):
-							pbot('Command is valid and not on cooldown. (%s) (%s)' % (
-								command, username),
-								channel
-							)
-							commands.update_last_used(command, channel)
-
-							resp = '%s %s' % (username, commands.get_return(command))
-							commands.update_last_used(command, channel)
-
-							pbot(resp, channel)
-							irc.send_message(channel, resp)
+				if username != config['username'].lower():
+					log_msg = '[%s]: %s' % (username, message)
+					queue.put((log_msg[:-1], 'BG_chat'))
