@@ -4,13 +4,13 @@ global config
 config = None
 
 def get_config(force_reload=False):
-	"""
-	TODO description
-	"""
-	global config
+    """
+    TODO description
+    """
+    global config
 
-	if config == None or force_reload:
-		with open('config.json') as config_file:
-			config = json.load(config_file)
+    if config == None or force_reload:
+        with open('config.json') as config_file:
+            config = json.load(config_file)
 
-	return config
+    return config

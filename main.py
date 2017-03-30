@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 try:
-	import Tkinter as tk
+    import Tkinter as tk
 except ImportError:
-	import tkinter as tk
+    import tkinter as tk
 
 from src.bot import *
 
