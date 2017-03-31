@@ -11,21 +11,22 @@ from src.config.config import *
 
 class RoboGUI:
     """
-    TODO description
+    TODO docstring.
     """
-    def __init__(self, master, queue, irc, end_app, toggle_bot):
+    def __init__(self, root, queue, irc, end_app, toggle_bot):
+        """Setup everything for our tkinter gui."""
         self.queue = queue
         self.irc = irc
         self.bg_color = 'BG_dark'
 
         # Set up the root widget
-        master.wm_title("RoboJiub (testing version)")
-        master.configure(background='#505050')
-        master.resizable(width=False, height=False)
+        root.wm_title("RoboJiub (testing version)")
+        root.configure(background='#505050')
+        root.resizable(width=False, height=False)
 
-        # Chat and debug log
-        self.log = tk.Text(master, width=80, height=20, background='#323232', foreground='#cccccc')
-        self.log.configure(state='disabled') # This gets input only from code
+        # Chat log
+        self.log = tk.Text(root, width=80, height=20, background='#323232', foreground='#cccccc')
+        self.log.configure(state='disabled') # Get input only from code
         self.log.tag_configure('BG_dark', background='#323232')
         self.log.tag_configure('BG_light', background='#3c3c3c')
         self.log.tag_configure('BG_error', background='#460000')
@@ -34,40 +35,36 @@ class RoboGUI:
         self.log.pack(anchor=tk.W, padx=10, pady=10)
 
         # Button to quit the application
-        button_end_app = tk.Button(master, text='Quit', command=end_app)
+        button_end_app = tk.Button(root, text="Quit", command=end_app)
         button_end_app.pack(anchor=tk.W, side=tk.LEFT, padx=10, pady=10)
 
         # Button to connect/disconnect the bot
-        self.button_toggle_bot = tk.Button(master, text='Connect', command=toggle_bot)
+        self.button_toggle_bot = tk.Button(root, text="Connect", command=toggle_bot)
         self.button_toggle_bot.pack(anchor=tk.W, side=tk.LEFT, padx=10, pady=10)
 
         # Manual post button
-        button_post = tk.Button(master, text='Post', command=self.manual_post)
+        button_post = tk.Button(root, text="Post", command=self.manual_post)
         button_post.pack(anchor=tk.W, side=tk.LEFT, padx=10, pady=10)
 
         # Manual post input widget
-        self.manual_text_box = tk.Text(master, width=40, height=2)
+        self.manual_text_box = tk.Text(root, width=40, height=2)
         self.manual_text_box.configure(background='#323232', foreground='#cccccc')
         self.manual_text_box.pack(anchor=tk.W, side=tk.LEFT, padx=10, pady=10)
 
     def toggle_bot_button(self, toggle):
-        """
-        Toggle the text on the connection button (Connect/Disconnect)
-        """
+        """Toggle the text on the connection button (Connect/Disconnect)."""
         if toggle:
-            self.button_toggle_bot.configure(text='Disconnect')
-        else: self.button_toggle_bot.configure(text='Connect')
+            self.button_toggle_bot.configure(text="Disconnect")
+        else: self.button_toggle_bot.configure(text="Connect")
 
     def handle_queue(self):
-        """
-        Handle messages currently in the queue (if any)
-        """
+        """Handle messages currently in the queue (print them, if any)."""
         while self.queue.qsize():
             try:
                 msg = self.queue.get(0)
                 msg_text = msg[0]
                 msg_color = msg[1]
-                msg_time = strftime('%X ', localtime())
+                msg_time = strftime("%X ", localtime())
 
                 if msg_color == 'BG_chat':
                     msg_color = self.bg_color
@@ -79,16 +76,13 @@ class RoboGUI:
                 self.log.insert(tk.END, msg_time + msg_text + '\n', msg_color)
                 self.log.see(tk.END)
                 self.log.configure(state='disabled')
-
             except Queue.Empty: pass
 
     def manual_post(self):
-        """
-        Post a custom message as the bot (from inside Tkinter GUI)
-        """
+        """Post a custom message as the bot (clear the input text box)."""
         config = get_config()
         log_msg = self.manual_text_box.get('1.0', tk.END).replace('\n', ' ')
 
-        self.queue.put(('[%s]: %s' % (config["irc"]["username"], log_msg), 'BG_chat'))
+        self.queue.put(("[{0}]: {1}".format((config['irc']['username'], log_msg)), 'BG_chat'))
         self.manual_text_box.delete('1.0', tk.END)
         self.irc.send_message(log_msg)

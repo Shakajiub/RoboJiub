@@ -1,7 +1,5 @@
 def ping(args):
-    """
-    TODO description
-    """
+    """ TODO docstring."""
     if len(args[2]) > 1:
         return False
     return "pong"

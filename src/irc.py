@@ -1,5 +1,6 @@
 # TODO credit https://github.com/aidanrwt/twitch-bot
 # TODO fix line lengths above 100
+# TODO research twitch-specific irc capabilities
 
 import re
 import socket
@@ -8,48 +9,53 @@ from src.config.config import *
 
 class IRC:
     """
-    TODO description
+    TODO docstring.
     """
     def __init__(self, queue):
         self.queue = queue
 
     def end_connection(self):
+        """Send a goodbye message through irc and close the socket."""
         try:
             config = get_config()
-            self.send_message(config["messages"]["goodbye"])
+            self.send_message(config['messages']['goodbye'])
             self.sock.close()
-        except: pass
+        except: print("Could not close socket (likely already closed)")
 
     def check_for_message(self, data):
+        """Return true if given data contains a message from a viewer."""
         if re.match(r'^:[a-zA-Z0-9_]+\![a-zA-Z0-9_]+@[a-zA-Z0-9_]+(\.tmi\.twitch\.tv|\.testserver\.local) PRIVMSG #[a-zA-Z0-9_]+ :.+$', data):
             return True
 
     def check_for_ping(self, data):
-        if data[:4] == "PING":
-            try:
-                self.sock.send('PONG %s\r\n' % data[5:])
-            except: pass
+        """If given data contains PING, send PONG + rest of the data through the irc socket."""
+        if data[:4] == 'PING':
+            try: self.sock.send('PONG {0}\r\n'.format(data[5:]))
+            except: print("Received PING but could not respond with PONG!")
 
     def check_login_status(self, data):
+        """Return false if given data says login was unsuccessful. True otherwise."""
         if re.match(r'^:(testserver\.local|tmi\.twitch\.tv) NOTICE \* :Login unsuccessful\r\n$', data):
             return False
         else: return True
 
     def send_message(self, message):
+        """Try to send given message as PRIVMSG through the irc socket."""
         config = get_config()
         try:
-            self.sock.send('PRIVMSG %s :%s\n' % (config['irc']['channel'], message.encode('utf-8')))
-        except: pass
+            self.sock.send('PRIVMSG {0} :{1}\n'.format(config['irc']['channel'], message.encode('utf-8')))
+        except: print("Could not send message through the socket!")
 
     def get_message(self, data):
+        """Return a dictionary containing the 'username' and the 'message' from given data."""
         return {
             'username': re.findall(r'^:([a-zA-Z0-9_]+)\!', data)[0],
             'message': re.findall(r'PRIVMSG #[a-zA-Z0-9_]+ :(.+)', data)[0].decode('utf8')
         }
 
     def get_irc_socket_object(self):
+        """Connect and join irc channels as setup in the config. Return None or the socket."""
         config = get_config()
-
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(10)
         self.sock = sock
@@ -57,20 +63,20 @@ class IRC:
         try:
             sock.connect((config['irc']['server'], config['irc']['port']))
         except:
-            self.queue.put(('Cannot connect to server (%s:%s)' % (config['irc']['server'], config['irc']['port']), 'BG_error'))
+            self.queue.put(("Cannot connect to server ({0}:{1})".format((config['irc']['server'], config['irc']['port'])), 'BG_error'))
             return None
 
         sock.settimeout(None)
-        sock.send('USER %s\r\n' % config['irc']['username'])
-        sock.send('PASS %s\r\n' % config['irc']['oauth_password'])
-        sock.send('NICK %s\r\n' % config['irc']['username'])
+        sock.send('USER {0}\r\n'.format(config['irc']['username']))
+        sock.send('PASS {0}\r\n'.format(config['irc']['oauth_password']))
+        sock.send('NICK {0}\r\n'.format(config['irc']['username']))
 
         if self.check_login_status(sock.recv(1024)):
-            self.queue.put(('Login successful, joining channel: %s' % config['irc']['channel'], 'BG_success'))
+            self.queue.put(("Login successful, joining channel: {0}".format(config['irc']['channel']), 'BG_success'))
         else:
-            self.queue.put(('Login failed! (possibly invalid oauth token)', 'BG_error'))
+            self.queue.put(("Login failed! (possibly invalid oauth token)", 'BG_error'))
             return None
 
-        self.sock.send('JOIN %s\r\n' % config['irc']['channel'])
-        self.send_message(config["messages"]["greeting"])
+        self.sock.send('JOIN {0}\r\n'.format(config['irc']['channel']))
+        self.send_message(config['messages']['greeting'])
         return sock

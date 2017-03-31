@@ -10,6 +10,12 @@
         "greeting": "RoboJiub activated CoolCat",
         "goodbye": "RoboJiub deactivated"
     },
+    "points": {
+        "enabled": true,
+        "currency": "point",
+        "timer": 60,
+        "amount": 1
+    },
     "commands": {
         "ping": {
             "enabled": true,
@@ -19,8 +25,8 @@
     "cron": {
         "example": {
             "enabled": true,
-            "message": "This message should appear every 20 seconds (as long as there are other messages in between)",
-            "timer": 20
+            "message": "This message should appear every 5 minutes (as long as there are other messages in-between)",
+            "timer": 300
         }
     }
 }

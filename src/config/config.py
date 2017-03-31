@@ -4,9 +4,7 @@ global config
 config = None
 
 def get_config(force_reload=False):
-    """
-    TODO description
-    """
+    """TODO docstring."""
     global config
 
     if config == None or force_reload:
