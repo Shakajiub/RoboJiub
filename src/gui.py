@@ -7,7 +7,7 @@ import Queue
 import tkFont
 
 from time import localtime, strftime
-from src.config.config import *
+from src.config.config import get_config
 
 class RoboGUI:
     """

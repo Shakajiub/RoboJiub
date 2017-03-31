@@ -7,26 +7,39 @@
         "oauth_password": "oauth:"
     },
     "messages": {
-        "greeting": "RoboJiub activated CoolCat",
+        "greeting": "RoboJiub activated",
         "goodbye": "RoboJiub deactivated"
     },
-    "points": {
+    "currency": {
         "enabled": true,
-        "currency": "point",
+        "name": "point",
         "timer": 60,
-        "amount": 1
+        "amount": 1,
+        "startwith": 10,
+        "log": false
     },
     "commands": {
-        "ping": {
+        "points": {
             "enabled": true,
-            "usage": "!ping"
+            "usage": "!points",
+            "limit": 0
+        },
+        "gamble": {
+            "enabled": true,
+            "usage": "!gamble <amount>",
+            "limit": 60
+        },
+        "donate": {
+            "enabled": true,
+            "usage": "!donate <recipient> <amount>",
+            "limit": 300
         }
     },
     "cron": {
-        "example": {
+        "currency": {
             "enabled": true,
-            "message": "This message should appear every 5 minutes (as long as there are other messages in-between)",
-            "timer": 300
+            "message": "You earn 1 point every minute here. Type !points to check your points!",
+            "timer": 1800
         }
     }
 }

@@ -5,7 +5,7 @@
 import re
 import socket
 
-from src.config.config import *
+from src.config.config import get_config
 
 class IRC:
     """
@@ -30,7 +30,8 @@ class IRC:
     def check_for_ping(self, data):
         """If given data contains PING, send PONG + rest of the data through the irc socket."""
         if data[:4] == 'PING':
-            try: self.sock.send('PONG {0}\r\n'.format(data[5:]))
+            try:
+                self.sock.send('PONG {0}\r\n'.format(data[5:]))
             except: print("Received PING but could not respond with PONG!")
 
     def check_login_status(self, data):

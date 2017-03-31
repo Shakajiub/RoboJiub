@@ -9,7 +9,8 @@ import importlib
 from src.irc import *
 from src.gui import *
 from src.commands import *
-from src.config.config import *
+from src.config.config import get_config
+from src.currency.currency import award_all_viewers
 
 class RoboJiub:
     """
@@ -25,6 +26,7 @@ class RoboJiub:
         self.running = True
         self.connected = False
         self.cron_value = 1 # Has to be high enough for cron messages
+        self.currency_timer = 100
         self.after_loop()
 
     def end_application(self):
@@ -50,15 +52,18 @@ class RoboJiub:
         """Force-reload the config and load all cron messages."""
         config = get_config(True)
         self.crons = {}
-
-        for cron in config['cron']:
-            new_cron = config['cron'][cron]
-            if new_cron['enabled']:
-                self.crons[cron] = {
-                    'timer': 0,
-                    'timer_max': new_cron['timer'] * 10,
-                    'message': new_cron['message']
-                }
+        try:
+            for cron in config['cron']:
+                new_cron = config['cron'][cron]
+                if new_cron['enabled']:
+                    self.crons[cron] = {
+                        'timer': 0,
+                        'timer_max': new_cron['timer'] * 10,
+                        'message': new_cron['message']
+                    }
+        except KeyError:
+            print("Cron messages are configured incorrectly!")
+            self.crons = {}
 
     def update_crons(self):
         """Update all cron messages, post them to chat when ready."""
@@ -70,9 +75,24 @@ class RoboJiub:
 
             if (loop_cron['timer'] >= loop_cron['timer_max']):
                 loop_cron['timer'] = 0
+                botname = config['irc']['username']
                 self.cron_value = 0
-                self.queue.put(("[{0}]: {1}".format((config['irc']['username'], loop_cron['message'])), 'BG_chat'))
+                self.queue.put(("[{0}]: {1}".format((botname, loop_cron['message'])), 'BG_chat'))
                 self.irc.send_message(loop_cron['message'])
+
+    def update_currency(self):
+        """If the currency system is enabled, reward all viewers according to the config."""
+        config = get_config()
+        if self.currency_timer < 1:
+            try:
+                if config['currency']['enabled']:
+                    if config['currency']['log']:
+                        self.queue.put(("Awarding currency to current viewers ...", 'BG_progress'))
+                    self.currency_timer = config['currency']['timer'] * 10
+                    award_all_viewers(config['currency']['amount'])
+            except KeyError:
+                print("Currency is incorrectly configured!")
+        else: self.currency_timer -= 1
 
     def after_loop(self):
         """Handle events outside of tkinter (recursive, looped 10 times per second)."""
@@ -84,6 +104,7 @@ class RoboJiub:
             os.kill(pid, 9)
         elif self.connected:
             self.update_crons()
+            self.update_currency()
 
         self.root.after(100, self.after_loop)
 
@@ -119,10 +140,12 @@ class RoboJiub:
                     if not config['commands'][command_name]['enabled']:
                         print("User tried to call disabled command: {0}".format(command_name))
                         continue
-                    args = (irc, queue, message.split(' '))
+                    args = (irc, queue, username, message.split(' '))
                     module = importlib.import_module('src.commands.{0}'.format(command_name))
                     result = getattr(module, command_name)(args)
-                    if not result:
+                    if result is None:
+                        continue
+                    if not result: # Aka False
                         result = "Usage: {0}".format(config['commands'][command_name]['usage'])
                     queue.put(("[{0}]: {1}".format(config['irc']['username'], result), 'BG_chat'))
                     irc.send_message(result)
