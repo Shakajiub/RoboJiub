@@ -62,7 +62,7 @@ class RoboJiub:
                         'message': new_cron['message']
                     }
         except KeyError:
-            print("Cron messages are configured incorrectly!")
+            print("Cron message config is corrupted!")
             self.crons = {}
 
     def update_crons(self):
@@ -91,7 +91,7 @@ class RoboJiub:
                     self.currency_timer = config['currency']['timer'] * 10
                     award_all_viewers(config['currency']['amount'])
             except KeyError:
-                print("Currency is incorrectly configured!")
+                print("Currency config is corrupted!")
         else: self.currency_timer -= 1
 
     def after_loop(self):
@@ -140,12 +140,12 @@ class RoboJiub:
                     if not config['commands'][command_name]['enabled']:
                         print("User tried to call disabled command: {0}".format(command_name))
                         continue
-                    args = (irc, queue, username, message.split(' '))
+                    args = (username, message[:-1].split(' '))
                     module = importlib.import_module('src.commands.{0}'.format(command_name))
                     result = getattr(module, command_name)(args)
-                    if result is None:
+                    if result is None: # Commands return None if there was an error
                         continue
-                    if not result: # Aka False
+                    if not result: # Commands return False if called incorrectly
                         result = "Usage: {0}".format(config['commands'][command_name]['usage'])
                     queue.put(("[{0}]: {1}".format(config['irc']['username'], result), 'BG_chat'))
                     irc.send_message(result)

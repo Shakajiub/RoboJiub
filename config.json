@@ -26,12 +26,12 @@
         },
         "gamble": {
             "enabled": true,
-            "usage": "!gamble <amount>",
+            "usage": "!gamble (amount)",
             "limit": 60
         },
         "donate": {
             "enabled": true,
-            "usage": "!donate <recipient> <amount>",
+            "usage": "!donate (recipient) (amount)",
             "limit": 300
         }
     },
