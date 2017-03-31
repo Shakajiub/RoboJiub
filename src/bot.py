@@ -1,5 +1,12 @@
 # TODO better requirements for cron messages (chat inactivity, message amount, ...)
 # TODO a better way to exit while waiting for socket.recv() - (in after_loop())
+# TODO custom command time-limits
+# TODO moderator-only commands (bonus, bonusall)
+# TODO automoderator features
+# TODO giveaway system
+# TODO song request system
+# TODO smart clever-bot style (heavily simplified) question system
+# TODO more accurate cron system (use time instead of silly loop count)
 
 import os
 import Queue
@@ -73,11 +80,12 @@ class RoboJiub:
             loop_cron = self.crons[cron]
             loop_cron['timer'] += 1
 
-            if (loop_cron['timer'] >= loop_cron['timer_max']):
+            if loop_cron['timer'] >= loop_cron['timer_max']:
+                config = get_config()
                 loop_cron['timer'] = 0
                 botname = config['irc']['username']
                 self.cron_value = 0
-                self.queue.put(("[{0}]: {1}".format((botname, loop_cron['message'])), 'BG_chat'))
+                self.queue.put(("[{0}]: {1}".format(botname, loop_cron['message']), 'BG_chat'))
                 self.irc.send_message(loop_cron['message'])
 
     def update_currency(self):
@@ -125,11 +133,11 @@ class RoboJiub:
             if not irc.check_for_message(data):
                 continue
             message_dict = irc.get_message(data)
-            username = message_dict['username']
+            username = message_dict['username'].encode('utf-8')
             if username == config['irc']['username']:
                 continue
 
-            message = message_dict['message']
+            message = message_dict['message'].encode('utf-8')
             log_msg = "[{0}]: {1}".format(username, message)
             queue.put((log_msg[:-1], 'BG_chat'))
             self.cron_value = 1

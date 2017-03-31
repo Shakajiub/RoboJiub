@@ -16,7 +16,7 @@
         "timer": 60,
         "amount": 1,
         "startwith": 10,
-        "log": false
+        "log": true
     },
     "commands": {
         "points": {
