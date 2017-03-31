@@ -4,7 +4,7 @@ from src.config.config import get_config
 from src.currency.currency import *
 
 def gamble(args):
-    """."""
+    """Return a string explaining if and how much currency the caller won/lost."""
     if len(args[1]) != 2:
         return False
     config = get_config()
