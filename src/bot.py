@@ -4,7 +4,7 @@
 # TODO moderator-only commands (bonus, bonusall)
 # TODO automoderator features
 # TODO giveaway system
-# TODO song request system
+# TODO song request system (with optional song cooldowns)
 # TODO smart clever-bot style (heavily simplified) question system
 # TODO more accurate cron system (use time instead of silly loop count)
 
@@ -142,8 +142,8 @@ class RoboJiub:
             queue.put((log_msg[:-1], 'BG_chat'))
             self.cron_value = 1
 
-            if message[0] == '!':
-                command_name = message.replace('!', '')[:-1].split(' ')[0]
+            if message[0:2] == 's!':
+                command_name = message[1:-1].replace('!', '')[:-1].split(' ')[0]
                 try:
                     if not config['commands'][command_name]['enabled']:
                         print("User tried to call disabled command: {0}".format(command_name))
@@ -154,7 +154,7 @@ class RoboJiub:
                     if result is None: # Commands return None if there was an error
                         continue
                     if not result: # Commands return False if called incorrectly
-                        result = "Usage: {0}".format(config['commands'][command_name]['usage'])
+                        result = "usage - {0}".format(config['commands'][command_name]['usage'])
                     queue.put(("[{0}]: {1}".format(config['irc']['username'], result), 'BG_chat'))
                     irc.send_message(result)
 

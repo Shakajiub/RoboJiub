@@ -21,17 +21,17 @@
     "commands": {
         "points": {
             "enabled": true,
-            "usage": "!points",
+            "usage": "s!points",
             "limit": 0
         },
         "gamble": {
             "enabled": true,
-            "usage": "!gamble (amount)",
+            "usage": "s!gamble (amount)",
             "limit": 60
         },
         "donate": {
             "enabled": true,
-            "usage": "!donate (recipient) (amount)",
+            "usage": "s!donate (recipient) (amount)",
             "limit": 300
         }
     },

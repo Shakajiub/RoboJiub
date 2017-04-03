@@ -11,7 +11,7 @@ def check_viewer_exists(viewer):
 def create_viewer(viewer, bonus=0):
     """Create a json file for a new viewer."""
     try:
-        with open('./viewers/' + viewer + '.json', 'wx') as f:
+        with open('./viewers/' + viewer + '.json', 'w') as f:
             try:
                 data = { 'currency': get_config()['currency']['startwith'] + bonus }
             except KeyError:
