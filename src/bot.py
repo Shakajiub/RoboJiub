@@ -7,7 +7,6 @@
 # TODO song request system (with optional song cooldowns)
 # TODO smart clever-bot style (heavily simplified) question system
 # TODO more accurate cron timer system (use time instead of silly loop count?)
-# TODO fix line lengths above 100
 
 import os
 import Queue
@@ -100,7 +99,9 @@ class RoboJiub:
                     if config['currency']['log']:
                         self.queue.put(("Awarding currency to current viewers", 'BG_progress'))
                     self.currency_timer = config['currency']['timer'] * 10
-                    award_all_viewers(config['currency']['amount'], self.queue)
+                    thread_currency = threading.Thread(target=award_all_viewers,
+                                args=(config['currency']['amount'], self.queue))
+                    thread_currency.start()
             except KeyError:
                 self.queue.put(("update_currency() - Currency config is corrupted", 'BG_error'))
         else:
@@ -148,25 +149,29 @@ class RoboJiub:
             queue.put((log_msg[:-1], 'BG_chat'))
             self.cron_value = 1
 
-            if message.startswith("s!"):
-                command_name = message[2:-1].split(' ')[0]
-                try:
-                    if not config['commands'][command_name]['enabled']:
-                        queue.put(("Command '{0}' is disabled, ignoring request".format(command_name), 'BG_progress'))
-                        continue
-                    args = (queue, username, message[:-1].split(' '))
-                    module = importlib.import_module('src.commands.{0}'.format(command_name))
-                    result = getattr(module, command_name)(args)
-                    if result is None: # Commands return None if there was an error
-                        continue
-                    if not result: # Commands return False if called incorrectly
-                        result = "usage - {0}".format(config['commands'][command_name]['usage'])
-                    queue.put(("[{0}]: {1}".format(config['irc']['username'], result), 'BG_chat'))
-                    irc.send_message(result)
+            if not message.startswith("s!"):
+                continue
+            command_name = message[2:-1].split(' ')[0]
+            try:
+                if not config['commands'][command_name]['enabled']:
+                    queue.put(("Command '{0}' is disabled, ignoring request".format(
+                                command_name), 'BG_progress'))
+                    continue
+                args = (queue, username, message[:-1].split(' '))
+                module = importlib.import_module('src.commands.{0}'.format(command_name))
+                result = getattr(module, command_name)(args)
+                if result is None: # Commands return None if there was an error
+                    continue
+                if not result: # Commands return False if called incorrectly
+                    result = "usage - {0}".format(config['commands'][command_name]['usage'])
+                queue.put(("[{0}]: {1}".format(config['irc']['username'], result), 'BG_chat'))
+                irc.send_message(result)
 
-                except KeyError:
-                    queue.put(("Command '{0}' is not defined".format(command_name), 'BG_progress'))
-                except ImportError:
-                    queue.put(("robo_main() - Could not import module '{0}'".format(command_name), 'BG_error'))
-                except AttributeError:
-                    queue.put(("robo_main() - No function found in module '{0}'".format(command_name), 'BG_error'))
+            except KeyError:
+                queue.put(("Command '{0}' is not defined".format(command_name), 'BG_progress'))
+            except ImportError:
+                queue.put(("robo_main() - Could not import module '{0}'".format(
+                            command_name), 'BG_error'))
+            except AttributeError:
+                queue.put(("robo_main() - No function found in module '{0}'".format(
+                            command_name), 'BG_error'))

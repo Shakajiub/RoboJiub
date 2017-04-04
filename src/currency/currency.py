@@ -1,5 +1,6 @@
 import os
 import json
+import errno
 
 from urllib2 import urlopen
 from src.config.config import get_config
@@ -8,9 +9,18 @@ def check_viewer_exists(viewer):
     """Return true if we have a json file for given viewer."""
     return os.path.isfile('./viewers/' + viewer + '.json')
 
+def make_sure_path_exists(path):
+    """Check if the given path exists on the system, if not, create it."""
+    try:
+        os.makedirs(path)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
+
 def create_viewer(viewer, queue, bonus=0):
     """Create a json file for a new viewer."""
     try:
+        make_sure_path_exists('./viewers/')
         with open('./viewers/' + viewer + '.json', 'w') as f:
             try:
                 data = { 'currency': get_config()['currency']['startwith'] + bonus }
@@ -19,7 +29,8 @@ def create_viewer(viewer, queue, bonus=0):
                 data = { 'currency': bonus }
             json.dump(data, f)
     except IOError:
-        queue.put(("create_viewer() - Could not create json file for '{0}'".format(viewer), 'BG_error'))
+        queue.put(("create_viewer() - Could not create json file for '{0}'".format(
+                    viewer), 'BG_error'))
 
 def delete_viewer(viewer):
     """Delete the json file of given viewer if it exists."""
@@ -39,11 +50,13 @@ def award_viewer(viewer, amount, queue):
                 json.dump(data, f)
                 f.truncate()
             except KeyError:
-                queue.put(("award_viewer() - Corrupted json file for '{0}'".format(viewer), 'BG_error'))
+                queue.put(("award_viewer() - Corrupted json file for '{0}'".format(
+                            viewer), 'BG_error'))
                 delete_viewer(viewer)
                 create_viewer(viewer, queue, amount)
     except IOError:
-        queue.put(("award_viewer() - Could not open json file for '{0}'".format(viewer), 'BG_error'))
+        queue.put(("award_viewer() - Could not open json file for '{0}'".format(
+                    viewer), 'BG_error'))
 
 def award_all_viewers(amount, queue):
     """Fetch the viewer list and award everyone with given amount of currency."""
@@ -75,10 +88,12 @@ def get_viewer_value(viewer, queue, key, retry=0):
                 value = data.get(key)
                 return value
             except KeyError:
-                queue.put(("get_viewer_value() - Corrupted json file for '{0}'".format(viewer), 'BG_error'))
+                queue.put(("get_viewer_value() - Corrupted json file for '{0}'".format(
+                            viewer), 'BG_error'))
                 delete_viewer(viewer)
                 create_viewer(viewer, queue)
                 return get_viewer_value(viewer, queue, key, retry + 1)
     except IOError:
-        queue.put(("get_viewer_value() - Could not open json file for '{0}'".format(viewer), 'BG_error'))
+        queue.put(("get_viewer_value() - Could not open json file for '{0}'".format(
+                    viewer), 'BG_error'))
         return get_viewer_value(viewer, queue, key, retry + 1)

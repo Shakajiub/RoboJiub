@@ -29,8 +29,11 @@ class IRC:
 
     def check_for_message(self, data):
         """Return true if given data contains a message from a viewer."""
-        if re.match(r'^:[a-zA-Z0-9_]+\![a-zA-Z0-9_]+@[a-zA-Z0-9_]+(\.tmi\.twitch\.tv) PRIVMSG #[a-zA-Z0-9_]+ :.+$', data):
+        s = '[a-zA-Z0-9_]'
+        if re.match(r'^:{0}+\!{0}+@{0}+(\.tmi\.twitch\.tv) PRIVMSG #{0}+ :.+$'.format(s), data):
             return True
+        else:
+            return False
 
     def check_for_ping(self, data):
         """If given data contains PING, send PONG + rest of the data through the irc socket."""
