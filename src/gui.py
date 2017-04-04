@@ -1,5 +1,4 @@
 # TODO distinguish bot comments from regular comments (with a custom color)
-# TODO print debug lines in the tkinter gui
 # TODO clear-chat button
 
 try:
@@ -59,7 +58,8 @@ class RoboGUI:
         """Toggle the text on the connection button (Connect/Disconnect)."""
         if toggle:
             self.button_toggle_bot.configure(text="Disconnect")
-        else: self.button_toggle_bot.configure(text="Connect")
+        else:
+            self.button_toggle_bot.configure(text="Connect")
 
     def handle_queue(self):
         """Handle messages currently in the queue (print them, if any)."""
@@ -75,6 +75,11 @@ class RoboGUI:
                     if self.bg_color == 'BG_dark':
                         self.bg_color = 'BG_light'
                     else: self.bg_color = 'BG_dark'
+                elif msg_color == 'BG_error':
+                    msg_text = "ERROR: " + msg_text + "!"
+                    print(msg_text)
+                elif msg_color == 'BG_progress':
+                    msg_text = msg_text + " ..."
 
                 self.log.configure(state='normal')
                 self.log.insert(tk.END, msg_time + msg_text + '\n', msg_color)
@@ -84,9 +89,13 @@ class RoboGUI:
 
     def manual_post(self):
         """Post a custom message as the bot (clear the input text box)."""
-        config = get_config()
         log_msg = self.manual_text_box.get('1.0', tk.END).replace('\n', ' ')
         if len(log_msg.strip(' ')) > 0:
-            self.queue.put(("[{0}]: {1}".format(config['irc']['username'], log_msg), 'BG_chat'))
+            try:
+                botname = get_config()['irc']['username']
+            except KeyError:
+                botname = "botname"
+                self.queue.put(("gui.manual_post() - IRC config is corrupted", 'BG_error'))
+            self.queue.put(("[{0}]: {1}".format(botname, log_msg), 'BG_chat'))
             self.irc.send_message(log_msg)
         self.manual_text_box.delete('1.0', tk.END)

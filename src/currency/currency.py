@@ -1,3 +1,5 @@
+# TODO replace print() with bot.queue.put()
+
 import os
 import json
 
