@@ -7,6 +7,7 @@
 # TODO song request system (with optional song cooldowns)
 # TODO smart clever-bot style (heavily simplified) question system
 # TODO more accurate cron timer system (use time instead of silly loop count?)
+# TODO fix line lengths above 100
 
 import os
 import Queue
@@ -99,7 +100,7 @@ class RoboJiub:
                     if config['currency']['log']:
                         self.queue.put(("Awarding currency to current viewers", 'BG_progress'))
                     self.currency_timer = config['currency']['timer'] * 10
-                    award_all_viewers(config['currency']['amount'])
+                    award_all_viewers(config['currency']['amount'], self.queue)
             except KeyError:
                 self.queue.put(("update_currency() - Currency config is corrupted", 'BG_error'))
         else:
@@ -153,7 +154,7 @@ class RoboJiub:
                     if not config['commands'][command_name]['enabled']:
                         queue.put(("Command '{0}' is disabled, ignoring request".format(command_name), 'BG_progress'))
                         continue
-                    args = (username, message[:-1].split(' '))
+                    args = (queue, username, message[:-1].split(' '))
                     module = importlib.import_module('src.commands.{0}'.format(command_name))
                     result = getattr(module, command_name)(args)
                     if result is None: # Commands return None if there was an error
