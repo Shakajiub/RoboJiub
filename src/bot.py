@@ -2,13 +2,13 @@
 # TODO a better way to exit while waiting for socket.recv() - (in after_loop())
 # TODO custom command time-limits
 # TODO moderator-only commands (bonus, bonusall)
-# TODO automoderator features
+# TODO automoderator features?
 # TODO giveaway system
 # TODO song request system (with optional song cooldowns)
 # TODO smart clever-bot style (heavily simplified) question system
-# TODO more accurate cron timer system (use time instead of silly loop count?)
 
 import os
+import time
 import Queue
 import threading
 import importlib
@@ -33,7 +33,7 @@ class RoboJiub:
         self.running = True
         self.connected = False
         self.cron_value = 1 # Has to be high enough for cron messages
-        self.currency_timer = 100
+        self.currency_timer = time.time()
         self.after_loop()
 
     def end_application(self):
@@ -60,12 +60,13 @@ class RoboJiub:
         config = get_config(True)
         self.crons = {}
         try:
+            current_time = time.time()
             for cron in config['cron']:
                 new_cron = config['cron'][cron]
                 if new_cron['enabled']:
                     self.crons[cron] = {
-                        'timer': 0,
-                        'timer_max': new_cron['timer'] * 10,
+                        'timer': current_time,
+                        'timer_max': new_cron['timer'],
                         'message': new_cron['message']
                     }
         except KeyError:
@@ -76,11 +77,11 @@ class RoboJiub:
         """Update all cron messages, post them to chat when ready."""
         if self.cron_value < 1:
             return
+        current_time = time.time()
         for cron in self.crons:
             loop_cron = self.crons[cron]
-            loop_cron['timer'] += 1
-            if loop_cron['timer'] >= loop_cron['timer_max']:
-                loop_cron['timer'] = 0
+            if current_time - loop_cron['timer'] > loop_cron['timer_max']:
+                loop_cron['timer'] = current_time
                 try:
                     botname = get_config()['irc']['username']
                 except KeyError:
@@ -93,19 +94,18 @@ class RoboJiub:
     def update_currency(self):
         """If the currency system is enabled, reward all viewers according to the config."""
         config = get_config()
-        if self.currency_timer < 1:
-            try:
-                if config['currency']['enabled']:
+        current_time = time.time()
+        try:
+            if config['currency']['enabled']:
+                if current_time - self.currency_timer > config['currency']['timer']:
                     if config['currency']['log']:
                         self.queue.put(("Awarding currency to current viewers", 'BG_progress'))
-                    self.currency_timer = config['currency']['timer'] * 10
+                    self.currency_timer = current_time
                     thread_currency = threading.Thread(target=award_all_viewers,
                                 args=(config['currency']['amount'], self.queue))
                     thread_currency.start()
-            except KeyError:
-                self.queue.put(("update_currency() - Currency config is corrupted", 'BG_error'))
-        else:
-            self.currency_timer -= 1
+        except KeyError:
+            self.queue.put(("update_currency() - Currency config is corrupted", 'BG_error'))
 
     def after_loop(self):
         """Handle events outside of tkinter (puts itself after root loop 10 times per second)."""
@@ -125,6 +125,11 @@ class RoboJiub:
         irc = self.irc
         sock = self.socket
         queue = self.queue
+        try:
+            botname = config['irc']['username']
+        except KeyError:
+            botname = "botname"
+            queue.put(("robo_main() - IRC config is corrupted", 'BG_error'))
 
         while self.connected:
             data = sock.recv(1024)
@@ -143,14 +148,16 @@ class RoboJiub:
             except KeyError:
                 queue.put(("robo_main() - IRC config is corrupted", 'BG_error'))
                 continue
-
             message = message_dict['message'].encode('utf-8')
             log_msg = "[{0}]: {1}".format(username, message)
             queue.put((log_msg[:-1], 'BG_chat'))
             self.cron_value = 1
 
             if not message.startswith("s!"):
-                continue
+                if message.startswith("@{0}".format(botname)): # Replace @bot with s!question
+                    message = "s!question {0}".format(message.split(' ', 1)[1])
+                else:
+                    continue
             command_name = message[2:-1].split(' ')[0]
             try:
                 if not config['commands'][command_name]['enabled']:

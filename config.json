@@ -34,6 +34,11 @@
             "enabled": true,
             "usage": "s!donate (recipient) (amount)",
             "limit": 300
+        },
+        "question": {
+            "enabled": true,
+            "usage": "s!question (yes/no question)",
+            "limit": 10
         }
     },
     "cron": {

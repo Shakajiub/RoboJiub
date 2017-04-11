@@ -11,15 +11,18 @@ def gamble(args):
     try:
         config = get_config()
         user_input = args[2]
+        viewer = args[1]
+        viewer_points = get_viewer_value(viewer, queue, 'currency')
 
         if not config['currency']['enabled']:
             return None
         if not user_input[1].isdigit():
-            return False
-
-        viewer = args[1]
-        gamble_amount = int(user_input[1])
-        viewer_points = get_viewer_value(viewer, queue, 'currency')
+            if user_input[1] == "everything":
+                gamble_amount = viewer_points
+            else:
+                return False
+        else:
+            gamble_amount = int(user_input[1])
         currency_name = config['currency']['name']
 
         if viewer_points < gamble_amount:
