@@ -55,26 +55,29 @@ class RoboGUI:
         else:
             self.button_toggle_bot.configure(text="Connect")
 
+    def prepare_queue_message(self, msg_text, msg_color):
+        """Return the proper color and suffix for given message."""
+        if msg_color == 'BG_chat':
+            msg_color = self.bg_color
+            if self.bg_color == 'BG_dark':
+                self.bg_color = 'BG_light'
+            else: self.bg_color = 'BG_dark'
+
+        elif msg_color == 'BG_error':
+            msg_text = "ERROR: " + msg_text + "!"
+            print(msg_text)
+
+        elif msg_color == 'BG_progress':
+            msg_text = msg_text + " ..."
+        return msg_text, msg_color
+
     def handle_queue(self):
         """Handle messages currently in the queue (print them, if any)."""
         while self.queue.qsize():
             try:
                 msg = self.queue.get(0)
-                msg_text = msg[0]
-                msg_color = msg[1]
+                msg_text, msg_color = self.prepare_queue_message(msg[0], msg[1])
                 msg_time = strftime("%X ", localtime())
-
-                if msg_color == 'BG_chat':
-                    msg_color = self.bg_color
-                    if self.bg_color == 'BG_dark':
-                        self.bg_color = 'BG_light'
-                    else: self.bg_color = 'BG_dark'
-                elif msg_color == 'BG_error':
-                    msg_text = "ERROR: " + msg_text + "!"
-                    print(msg_text)
-                elif msg_color == 'BG_progress':
-                    msg_text = msg_text + " ..."
-
                 self.log.configure(state='normal')
                 self.log.insert(tk.END, msg_time + msg_text + '\n', msg_color)
                 self.log.see(tk.END)

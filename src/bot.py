@@ -106,14 +106,10 @@ class RoboJiub:
     def robo_main(self):
         """Handle messages received via irc socket (main function of the bot, basically)."""
         config = get_config()
+        botname = get_botname()
         irc = self.irc
         sock = self.socket
         queue = self.queue
-        try:
-            botname = config['irc']['username']
-        except KeyError:
-            botname = "botname"
-            queue.put(("robo_main() - IRC config is corrupted", 'BG_error'))
 
         while self.connected:
             data = sock.recv(1024)
@@ -126,11 +122,7 @@ class RoboJiub:
                 continue
             message_dict = irc.get_message(data)
             username = message_dict['username'].encode('utf-8')
-            try:
-                if username == config['irc']['username']:
-                    continue
-            except KeyError:
-                queue.put(("robo_main() - IRC config is corrupted", 'BG_error'))
+            if username == botname:
                 continue
             message = message_dict['message'].encode('utf-8')
             log_msg = "[{0}]: {1}".format(username, message)

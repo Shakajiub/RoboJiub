@@ -11,12 +11,8 @@ class IRC:
     def end_connection(self):
         """Send a goodbye message through irc and close the socket."""
         try:
-            config = get_config()
-            if config['messages']['enabled']:
-                self.send_message(config['messages']['goodbye'])
+            self.send_custom_message('goodbye')
             self.sock.close()
-        except KeyError:
-            self.queue.put(("irc.end_connection() - Message config is corrupted", 'BG_error'))
         except Exception:
             self.queue.put(("{0}".format(sys.exc_info()[0]), 'BG_error'))
             self.queue.put(("irc.end_connection() - Could not close socket", 'BG_error'))
@@ -56,6 +52,15 @@ class IRC:
             self.queue.put(("{0}".format(sys.exc_info()[0]), 'BG_error'))
             self.queue.put(("irc.send_message() - Could not send message", 'BG_error'))
 
+    def send_custom_message(self, message):
+        """Try to send given message (if defined in the config)."""
+        config = get_config()
+        try:
+            if config['messages']['enabled']:
+                self.send_message(config['messages'][message])
+        except KeyError:
+            self.queue.put(("irc.send_custom_message() - Could not send '{0}'".format(message)))
+
     def get_message(self, data):
         """Return a dictionary containing the 'username' and the 'message' from given data."""
         return {
@@ -69,18 +74,17 @@ class IRC:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(10)
         self.sock = sock
+
         if not self.connect_socket(config):
             return None
+
         sock.settimeout(None)
         channel = self.login_socket(config)
         if not channel:
             return None
-        try:
-            self.sock.send('JOIN {0}\r\n'.format(channel))
-            if config['messages']['enabled']:
-                self.send_message(config['messages']['greeting'])
-        except KeyError:
-            self.queue.put(("irc.get_socket_object() - Message config is corrupted", 'BG_error'))
+
+        self.sock.send('JOIN {0}\r\n'.format(channel))
+        self.send_custom_message('greeting')
         return sock
 
     def connect_socket(self, config):
