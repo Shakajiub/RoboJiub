@@ -1,6 +1,4 @@
 from random import randrange
-
-from src.config.config import get_config
 from src.currency.currency import *
 
 def gamble(args):
@@ -8,18 +6,11 @@ def gamble(args):
     if len(args[2]) != 2:
         return False
     queue = args[0]
-    config = get_config()
     user_input = args[2]
 
-    try:
-        if not config['currency']['enabled']:
-            return None
-        if not user_input[1].isdigit():
-            return False
-        currency_name = config['currency']['name']
-    except KeyError:
-        queue.put(("gamble() - Currency config is corrupted", 'BG_error'))
-        return None
+    currency_name = validate_currency(user_input[1], queue)
+    if not currency_name:
+        return currency_name
 
     viewer = args[1]
     viewer_points = get_viewer_value(viewer, queue, 'currency')

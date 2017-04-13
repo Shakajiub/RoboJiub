@@ -69,30 +69,11 @@ class IRC:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.settimeout(10)
         self.sock = sock
-        try:
-            sock.connect((config['irc']['server'], config['irc']['port']))
-        except KeyError:
-            self.queue.put(("irc.get_socket_object() - IRC config is corrupted", 'BG_error'))
+        if not self.connect_socket(config):
             return None
-        except Exception:
-            self.queue.put(("{0}".format(sys.exc_info()[0]), 'BG_error'))
-            self.queue.put(("irc.get_socket_object() - Cannot connect to server", 'BG_error'))
-            return None
-
         sock.settimeout(None)
-        try:
-            sock.send('USER {0}\r\n'.format(config['irc']['username']))
-            sock.send('PASS {0}\r\n'.format(config['irc']['oauth_password']))
-            sock.send('NICK {0}\r\n'.format(config['irc']['username']))
-            channel = config['irc']['channel']
-        except KeyError:
-            self.queue.put(("irc.get_socket_object() - IRC config is corrupted", 'BG_error'))
-            return None
-
-        if self.check_login_status(sock.recv(1024)):
-            self.queue.put(("Login successful, joining channel {0}".format(channel), 'BG_success'))
-        else:
-            self.queue.put(("Login failed (possibly invalid oauth token)", 'BG_error'))
+        channel = self.login_socket(config)
+        if not channel:
             return None
         try:
             self.sock.send('JOIN {0}\r\n'.format(channel))
@@ -101,3 +82,32 @@ class IRC:
         except KeyError:
             self.queue.put(("irc.get_socket_object() - Message config is corrupted", 'BG_error'))
         return sock
+
+    def connect_socket(self, config):
+        """Connect our socket as defined in the config. Return true on success."""
+        try:
+            self.sock.connect((config['irc']['server'], config['irc']['port']))
+            return True
+        except KeyError:
+            self.queue.put(("irc.get_socket_object() - IRC config is corrupted", 'BG_error'))
+        except Exception:
+            self.queue.put(("{0}".format(sys.exc_info()[0]), 'BG_error'))
+            self.queue.put(("irc.get_socket_object() - Cannot connect to server", 'BG_error'))
+        return False
+
+    def login_socket(self, config):
+        """Login to the IRC channel as defined in the config. Return the channel name joined."""
+        try:
+            self.sock.send('USER {0}\r\n'.format(config['irc']['username']))
+            self.sock.send('PASS {0}\r\n'.format(config['irc']['oauth_password']))
+            self.sock.send('NICK {0}\r\n'.format(config['irc']['username']))
+            channel = config['irc']['channel']
+        except KeyError:
+            self.queue.put(("irc.get_socket_object() - IRC config is corrupted", 'BG_error'))
+            return False
+        if self.check_login_status(self.sock.recv(1024)):
+            self.queue.put(("Login successful, joining channel {0}".format(channel), 'BG_success'))
+        else:
+            self.queue.put(("Login failed (possibly invalid oauth token)", 'BG_error'))
+            return False
+        return channel

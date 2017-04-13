@@ -1,4 +1,3 @@
-from src.config.config import get_config
 from src.currency.currency import *
 
 def donate(args):
@@ -6,18 +5,11 @@ def donate(args):
     if len(args[2]) != 3:
         return False
     queue = args[0]
-    config = get_config()
     user_input = args[2]
 
-    try:
-        if not config['currency']['enabled']:
-            return None
-        if not user_input[2].isdigit():
-            return False
-        currency_name = config['currency']['name']
-    except KeyError:
-        queue.put(("donate() - Currency config is corrupted", 'BG_error'))
-        return None
+    currency_name = validate_currency(user_input[2], queue)
+    if not currency_name:
+        return currency_name
 
     viewer = args[1]
     recipient = user_input[1].lower()

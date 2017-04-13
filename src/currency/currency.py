@@ -88,3 +88,16 @@ def get_viewer_value(viewer, queue, key):
     except IOError:
         queue.put(("get_viewer_value() - Could not open json file for '{0}'".format(
                     viewer), 'BG_error'))
+
+def validate_currency(user_input, queue):
+    """Return the name of the currency if it's enabled and given input is a digit."""
+    config = get_config()
+    try:
+        if not config['currency']['enabled']:
+            return None
+        if not user_input.isdigit():
+            return False
+        return config['currency']['name']
+    except KeyError:
+        queue.put(("validate_currency() - Currency config is corrupted", 'BG_error'))
+        return None
