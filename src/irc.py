@@ -22,8 +22,7 @@ class IRC:
         s = '[a-zA-Z0-9_]'
         if re.match(r'^:{0}+\!{0}+@{0}+(\.tmi\.twitch\.tv) PRIVMSG #{0}+ :.+$'.format(s), data):
             return True
-        else:
-            return False
+        return False
 
     def check_for_ping(self, data):
         """If given data contains PING, send PONG + rest of the data through the irc socket."""
@@ -38,8 +37,7 @@ class IRC:
         """Return false if given data says login was unsuccessful. True otherwise."""
         if re.match(r'^:(tmi\.twitch\.tv) NOTICE \* :Login unsuccessful\r\n$', data):
             return False
-        else:
-            return True
+        return True
 
     def send_message(self, message):
         """Try to send given message as PRIVMSG through the irc socket."""
@@ -59,7 +57,8 @@ class IRC:
             if config['messages']['enabled']:
                 self.send_message(config['messages'][message])
         except KeyError:
-            self.queue.put(("irc.send_custom_message() - Could not send '{0}'".format(message)))
+            self.queue.put(("irc.send_custom_message() - Could not send message '{0}'".format(
+                            message), 'BG_error'))
 
     def get_message(self, data):
         """Return a dictionary containing the 'username' and the 'message' from given data."""
@@ -93,10 +92,10 @@ class IRC:
             self.sock.connect((config['irc']['server'], config['irc']['port']))
             return True
         except KeyError:
-            self.queue.put(("irc.get_socket_object() - IRC config is corrupted", 'BG_error'))
+            self.queue.put(("irc.connect_socket() - IRC config is corrupted", 'BG_error'))
         except Exception:
             self.queue.put(("{0}".format(sys.exc_info()[0]), 'BG_error'))
-            self.queue.put(("irc.get_socket_object() - Cannot connect to server", 'BG_error'))
+            self.queue.put(("irc.connect_socket() - Cannot connect to server", 'BG_error'))
         return False
 
     def login_socket(self, config):
@@ -107,7 +106,7 @@ class IRC:
             self.sock.send('NICK {0}\r\n'.format(config['irc']['username']))
             channel = config['irc']['channel']
         except KeyError:
-            self.queue.put(("irc.get_socket_object() - IRC config is corrupted", 'BG_error'))
+            self.queue.put(("irc.login_socket() - IRC config is corrupted", 'BG_error'))
             return False
         if self.check_login_status(self.sock.recv(1024)):
             self.queue.put(("Login successful, joining channel {0}".format(channel), 'BG_success'))

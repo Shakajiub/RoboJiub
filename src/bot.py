@@ -106,7 +106,6 @@ class RoboJiub:
     def robo_main(self):
         """Handle messages received via irc socket (main function of the bot, basically)."""
         config = get_config()
-        botname = get_botname()
         irc = self.irc
         sock = self.socket
         queue = self.queue
@@ -118,43 +117,76 @@ class RoboJiub:
                 sock = self.irc.get_socket_object()
 
             irc.check_for_ping(data)
-            if not irc.check_for_message(data):
+            user_command = self.check_for_command(irc, data, queue)
+            if not user_command:
                 continue
-            message_dict = irc.get_message(data)
-            username = message_dict['username'].encode('utf-8')
-            if username == botname:
-                continue
-            message = message_dict['message'].encode('utf-8')
-            log_msg = "[{0}]: {1}".format(username, message)
-            queue.put((log_msg[:-1], 'BG_chat'))
-            self.cron_value = 1
-
-            if not message.startswith("s!"):
-                if message.startswith("@{0}".format(botname)): # Replace @bot with s!question
-                    message = "s!question {0}".format(message.split(' ', 1)[1])
-                else:
-                    continue
+            username, message = user_command[0], user_command[1]
             command_name = message[2:-1].split(' ')[0]
-            try:
-                if not config['commands'][command_name]['enabled']:
-                    queue.put(("Command '{0}' is disabled, ignoring request".format(
-                                command_name), 'BG_progress'))
-                    continue
-                args = (queue, username, message[:-1].split(' '))
-                module = importlib.import_module('src.commands.{0}'.format(command_name))
-                result = getattr(module, command_name)(args)
-                if result is None: # Commands return None if there was an error
-                    continue
-                if not result: # Commands return False if called incorrectly
-                    result = "usage - {0}".format(config['commands'][command_name]['usage'])
-                queue.put(("[{0}]: {1}".format(config['irc']['username'], result), 'BG_chat'))
+            if not self.check_command_enabled(command_name, queue):
+                continue
+
+            args = (queue, username, message[:-1].split(' '))
+            module = self.get_command_module(command_name, queue)
+            result = self.get_command_result(module, command_name, args, queue)
+            if result:
                 irc.send_message(result)
 
-            except KeyError:
-                queue.put(("Command '{0}' is not defined".format(command_name), 'BG_progress'))
-            except ImportError:
-                queue.put(("robo_main() - Could not import module '{0}'".format(
-                            command_name), 'BG_error'))
-            except AttributeError:
-                queue.put(("robo_main() - No function found in module '{0}'".format(
-                            command_name), 'BG_error'))
+    def check_for_command(self, irc, data, queue):
+        """If given data contains a command, return the username & the command, otherwise false."""
+        if not irc.check_for_message(data):
+            return False
+
+        botname = get_botname()
+        message_dict = irc.get_message(data)
+        username = message_dict['username'].encode('utf-8')
+        if username == botname:
+            return False
+
+        message = message_dict['message'].encode('utf-8')
+        queue.put(("[{0}]: {1}".format(username, message)[:-1], 'BG_chat'))
+        self.cron_value = 1
+
+        if not message.startswith("s!"):
+            if message.startswith("@{0}".format(botname)): # Replace @bot with s!question
+                message = "s!question {0}".format(message.split(' ', 1)[1])
+            else:
+                return False
+        return (username, message)
+
+    def check_command_enabled(self, command_name, queue):
+        """Return true if the given command is enabled."""
+        try:
+            if get_config()['commands'][command_name]['enabled']:
+                return True
+            else:
+                queue.put(("Command '{0}' is disabled, ignoring request".format(
+                            command_name), 'BG_progress'))
+                return False
+        except KeyError:
+            return False
+
+    def get_command_module(self, command_name, queue):
+        """Return the appropriate module for given command. None if we can't import it."""
+        try:
+            module = importlib.import_module('src.commands.{0}'.format(command_name))
+            return module
+        except ImportError:
+            queue.put(("get_command_module() - Could not import module '{0}'".format(
+                        command_name), 'BG_error'))
+        return None
+
+    def get_command_result(self, module, command_name, args, queue):
+        """Return the result (string) from given command in given module."""
+        config = get_config()
+        try:
+            result = getattr(module, command_name)(args)
+            if result is None: # Commands return None if there was an error
+                return None
+            if not result: # Commands return False if called incorrectly
+                result = "usage: {0}".format(config['commands'][command_name]['usage'])
+            queue.put(("[{0}]: {1}".format(config['irc']['username'], result), 'BG_chat'))
+            return result
+        except AttributeError:
+            queue.put(("get_command_result() - No function found in module '{0}'".format(
+                        command_name), 'BG_error'))
+        return None
