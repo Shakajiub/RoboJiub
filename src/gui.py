@@ -1,6 +1,3 @@
-# TODO distinguish bot comments from regular comments (with a custom color)
-# TODO clear-chat button
-
 try:
     import Tkinter as tk
 except ImportError:
@@ -10,7 +7,7 @@ import Queue
 import tkFont
 
 from time import localtime, strftime
-from src.config.config import get_config
+from src.config.config import *
 
 class RoboGUI:
     """
@@ -91,11 +88,7 @@ class RoboGUI:
         """Post a custom message as the bot (clear the input text box)."""
         log_msg = self.manual_text_box.get('1.0', tk.END).replace('\n', ' ')
         if len(log_msg.strip(' ')) > 0:
-            try:
-                botname = get_config()['irc']['username']
-            except KeyError:
-                botname = "botname"
-                self.queue.put(("gui.manual_post() - IRC config is corrupted", 'BG_error'))
+            botname = get_botname()
             self.queue.put(("[{0}]: {1}".format(botname, log_msg), 'BG_chat'))
             self.irc.send_message(log_msg)
         self.manual_text_box.delete('1.0', tk.END)

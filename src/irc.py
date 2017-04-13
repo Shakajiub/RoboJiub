@@ -1,6 +1,3 @@
-# TODO credit https://github.com/aidanrwt/twitch-bot
-# TODO research twitch-specific irc capabilities
-
 import re
 import sys
 import socket

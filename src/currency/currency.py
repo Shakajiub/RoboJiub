@@ -72,15 +72,11 @@ def award_all_viewers(amount, queue):
     except KeyError:
         queue.put(("award_all_viewers() - IRC config is corrupted", 'BG_error'))
 
-def get_viewer_value(viewer, queue, key, retry=0):
+def get_viewer_value(viewer, queue, key):
     """Return the value of given key in the json file of given viewer."""
-    if retry > 1:
-        queue.put(("get_viewer_value() - Something went seriously wrong", 'BG_error'))
-        return False
     config = get_config()
     if not check_viewer_exists(viewer):
         create_viewer(viewer, queue)
-        return get_viewer_value(viewer, queue, key, retry + 1)
     try:
         with open('./viewers/' + viewer + '.json', 'r') as f:
             data = json.load(f)
@@ -88,12 +84,7 @@ def get_viewer_value(viewer, queue, key, retry=0):
                 value = data.get(key)
                 return value
             except KeyError:
-                queue.put(("get_viewer_value() - Corrupted json file for '{0}'".format(
-                            viewer), 'BG_error'))
-                delete_viewer(viewer)
-                create_viewer(viewer, queue)
-                return get_viewer_value(viewer, queue, key, retry + 1)
+                queue.put(("get_viewer_value() - Invalid key '{0}'".format(key), 'BG_error'))
     except IOError:
         queue.put(("get_viewer_value() - Could not open json file for '{0}'".format(
                     viewer), 'BG_error'))
-        return get_viewer_value(viewer, queue, key, retry + 1)

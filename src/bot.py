@@ -1,12 +1,3 @@
-# TODO better requirements for cron messages (chat inactivity, message amount, ...)
-# TODO a better way to exit while waiting for socket.recv() - (in after_loop())
-# TODO custom command time-limits
-# TODO moderator-only commands (bonus, bonusall)
-# TODO automoderator features?
-# TODO giveaway system
-# TODO song request system (with optional song cooldowns)
-# TODO smart clever-bot style (heavily simplified) question system
-
 import os
 import time
 import Queue
@@ -16,7 +7,7 @@ import importlib
 from src.irc import *
 from src.gui import *
 from src.commands import *
-from src.config.config import get_config
+from src.config.config import *
 from src.currency.currency import award_all_viewers
 
 class RoboJiub:
@@ -82,11 +73,7 @@ class RoboJiub:
             loop_cron = self.crons[cron]
             if current_time - loop_cron['timer'] > loop_cron['timer_max']:
                 loop_cron['timer'] = current_time
-                try:
-                    botname = get_config()['irc']['username']
-                except KeyError:
-                    botname = "botname"
-                    self.queue.put(("update_crons() - IRC config is corrupted", 'BG_error'))
+                botname = get_botname()
                 self.cron_value = 0
                 self.queue.put(("[{0}]: {1}".format(botname, loop_cron['message']), 'BG_chat'))
                 self.irc.send_message(loop_cron['message'])
