@@ -19,3 +19,12 @@ def get_botname():
     except KeyError:
         self.queue.put(("config.get_botname() - IRC config is corrupted", 'BG_error'))
     return botname
+
+def get_channel():
+    """Return the name of the main channel as set up in the config. False if not set up."""
+    try:
+        channel = get_config()['irc']['channel']
+        return channel
+    except KeyError:
+        self.queue.put(("config.get_channel() - IRC config is corrupted", 'BG_error'))
+        return False

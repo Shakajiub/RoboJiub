@@ -128,8 +128,7 @@ class RoboJiub:
             args = (queue, username, message[:-1].split(' '))
             module = self.get_command_module(command_name, queue)
             result = self.get_command_result(module, command_name, args, queue)
-            if result:
-                irc.send_message(result)
+            irc.send_message(result)
 
     def check_for_command(self, irc, data, queue):
         """If given data contains a command, return the username & the command, otherwise false."""
@@ -180,10 +179,10 @@ class RoboJiub:
         config = get_config()
         try:
             result = getattr(module, command_name)(args)
-            if result is None: # Commands return None if there was an error
+            if result == None: # Commands return None if there was an error
                 return None
-            if not result: # Commands return False if called incorrectly
-                result = "usage: {0}".format(config['commands'][command_name]['usage'])
+            if result == False: # Commands return False if called incorrectly
+                result = "command usage: {0}".format(config['commands'][command_name]['usage'])
             queue.put(("[{0}]: {1}".format(config['irc']['username'], result), 'BG_chat'))
             return result
         except AttributeError:

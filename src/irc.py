@@ -2,7 +2,7 @@ import re
 import sys
 import socket
 
-from src.config.config import get_config
+from src.config.config import *
 
 class IRC:
     def __init__(self, queue):
@@ -41,11 +41,12 @@ class IRC:
 
     def send_message(self, message):
         """Try to send given message as PRIVMSG through the irc socket."""
+        if message == None:
+            return
         try:
-            channel = get_config()['irc']['channel']
-            self.sock.send('PRIVMSG {0} :{1}\n'.format(channel, message.encode('utf-8')))
-        except KeyError:
-            self.queue.put(("irc.send_message() - IRC config is corrupted", 'BG_error'))
+            channel = get_channel()
+            if channel:
+                self.sock.send('PRIVMSG {0} :{1}\n'.format(channel, message.encode('utf-8')))
         except Exception:
             self.queue.put(("{0}".format(sys.exc_info()[0]), 'BG_error'))
             self.queue.put(("irc.send_message() - Could not send message", 'BG_error'))
