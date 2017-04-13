@@ -10,9 +10,6 @@ from time import localtime, strftime
 from src.config.config import *
 
 class RoboGUI:
-    """
-    TODO docstring.
-    """
     def __init__(self, root, queue, irc, end_app, toggle_bot):
         """Setup everything for our tkinter gui."""
         self.queue = queue

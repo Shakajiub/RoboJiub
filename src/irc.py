@@ -5,9 +5,6 @@ import socket
 from src.config.config import get_config
 
 class IRC:
-    """
-    TODO docstring.
-    """
     def __init__(self, queue):
         self.queue = queue
 

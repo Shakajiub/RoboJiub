@@ -8,45 +8,38 @@ def gamble(args):
     if len(args[2]) != 2:
         return False
     queue = args[0]
-    try:
-        config = get_config()
-        user_input = args[2]
-        viewer = args[1]
-        viewer_points = get_viewer_value(viewer, queue, 'currency')
+    config = get_config()
+    user_input = args[2]
 
+    try:
         if not config['currency']['enabled']:
             return None
         if not user_input[1].isdigit():
-            if user_input[1] == "everything":
-                gamble_amount = viewer_points
-            else:
-                return False
-        else:
-            gamble_amount = int(user_input[1])
+            return False
         currency_name = config['currency']['name']
-
-        if viewer_points < gamble_amount:
-            return "@{0} - You don't have enough {1}s for that!".format(viewer, currency_name)
-
-        random_roll = randrange(1, 100)
-        if random_roll == 100:
-            award_viewer(viewer, gamble_amount * 2, queue)
-            return "@{0} - Rolled 100! Won {1} {2}s, you now have {3} {2}s!".format(
-                viewer, gamble_amount * 3, currency_name,
-                viewer_points + (gamble_amount * 2)
-            )
-        elif random_roll > 59:
-            award_viewer(viewer, gamble_amount, queue)
-            return "@{0} - Rolled {1}! Won {2} {3}s, you now have {4} {3}s!".format(
-                viewer, random_roll, gamble_amount * 2, currency_name,
-                viewer_points + gamble_amount
-            )
-        else:
-            award_viewer(viewer, -gamble_amount, queue)
-            return "@{0} - Rolled {1}! Lost {2} {3}s, you now have {4} {3}s.".format(
-                viewer, random_roll, gamble_amount, currency_name,
-                viewer_points - gamble_amount
-            )
     except KeyError:
         queue.put(("gamble() - Currency config is corrupted", 'BG_error'))
         return None
+
+    viewer = args[1]
+    viewer_points = get_viewer_value(viewer, queue, 'currency')
+    gamble_amount = int(user_input[1])
+    if viewer_points < gamble_amount:
+        return "@{0} - You don't have enough {1}s for that!".format(viewer, currency_name)
+
+    random_roll = randrange(1, 100)
+    if random_roll == 100:
+        award_viewer(viewer, gamble_amount * 2, queue)
+        return "@{0} - Rolled 100! Won {1} {2}s, you now have {3} {2}s!".format(
+            viewer, gamble_amount * 3, currency_name, viewer_points + (gamble_amount * 2)
+        )
+    elif random_roll > 59:
+        award_viewer(viewer, gamble_amount, queue)
+        return "@{0} - Rolled {1}! Won {2} {3}s, you now have {4} {3}s!".format(
+            viewer, random_roll, gamble_amount * 2, currency_name, viewer_points + gamble_amount
+        )
+    else:
+        award_viewer(viewer, -gamble_amount, queue)
+        return "@{0} - Rolled {1}! Lost {2} {3}s, you now have {4} {3}s.".format(
+            viewer, random_roll, gamble_amount, currency_name, viewer_points - gamble_amount
+        )

@@ -11,9 +11,6 @@ from src.config.config import *
 from src.currency.currency import award_all_viewers
 
 class RoboJiub:
-    """
-    TODO docstring.
-    """
     def __init__(self, root):
         """Instantiate our gui, irc, message queue and state booleans."""
         self.root = root
