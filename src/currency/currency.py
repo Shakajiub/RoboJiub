@@ -71,6 +71,9 @@ def award_all_viewers(amount, queue):
                 award_viewer(viewer, amount, queue)
     except KeyError:
         queue.put(("award_all_viewers() - IRC config is corrupted", 'BG_error'))
+    except URLError:
+        queue.put(("award_all_viewers() - Could not get user list", 'BG_error'))
+    #queue.put(("Done!", 'BG_success'))
 
 def get_viewer_value(viewer, queue, key):
     """Return the value of given key in the json file of given viewer."""
