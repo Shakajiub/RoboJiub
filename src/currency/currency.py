@@ -2,7 +2,7 @@ import os
 import json
 import errno
 
-from urllib2 import urlopen
+from urllib2 import urlopen, URLError
 from src.config.config import get_config
 
 def check_viewer_exists(viewer):
