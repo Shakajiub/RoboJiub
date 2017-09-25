@@ -120,6 +120,7 @@ class RoboJiub:
             user_command = self.check_for_command(irc, data, queue)
             if not user_command:
                 continue
+
             username, message = user_command[0], user_command[1]
             command_name = message[2:-1].split(' ')[0]
             if not self.check_command_enabled(command_name, queue):
@@ -148,8 +149,9 @@ class RoboJiub:
         if not message.startswith("s!"):
             if message.startswith("@{0}".format(botname)): # Replace @bot with s!question
                 message = "s!question {0}".format(message.split(' ', 1)[1])
-            else:
-                return False
+            elif message.startswith("!shakait"):
+                message = "s!shakait " # There's a little problem, need a space/endline char here
+            else: return False
         return (username, message)
 
     def check_command_enabled(self, command_name, queue):
