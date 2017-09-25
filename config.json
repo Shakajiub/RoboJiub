@@ -4,10 +4,10 @@
         "port": 6667,
         "channel": "#shakajiub",
         "username": "robojiub",
-        "oauth_password": "oauth:"
+        "oauth_password": ""
     },
     "messages": {
-        "enabled": true,
+        "enabled": false,
         "greeting": "RoboJiub activated",
         "goodbye": "RoboJiub deactivated"
     },
@@ -39,11 +39,16 @@
             "enabled": true,
             "usage": "s!question (yes/no question)",
             "limit": 10
+        },
+        "shakait": {
+            "enabled": true,
+            "usage": "!shakait / s!shakait",
+            "limit": 0
         }
     },
     "cron": {
         "currency": {
-            "enabled": true,
+            "enabled": false,
             "message": "You earn 1 point every minute here. Type s!points to check your points!",
             "timer": 1800
         }
