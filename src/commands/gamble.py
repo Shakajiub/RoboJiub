@@ -36,6 +36,6 @@ def randomize_award(queue, viewer, viewer_points, gamble_amount, currency_name):
         )
     else:
         award_viewer(viewer, -gamble_amount, queue)
-        return "@{0} - Rolled {1}! Lost {2} {3}s, you now have {4} {3}s.".format(
+        return "@{0} - Rolled {1}! Lost {2} {3}s, you now have {4} {3}s".format(
             viewer, random_roll, gamble_amount, currency_name, viewer_points - gamble_amount
         )

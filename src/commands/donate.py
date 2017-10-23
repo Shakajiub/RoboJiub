@@ -34,6 +34,6 @@ def donate(args):
 
     award_viewer(viewer, -donation_amount, queue)
     award_viewer(recipient, donation_amount, queue)
-    return "@{0} donated {1} {2}{3} to @{4}!".format(
+    return "@{0} donated {1} {2}{3} to @{4} !".format(
         viewer, donation_amount, currency_name, "s" if donation_amount != 1 else "", recipient
     )

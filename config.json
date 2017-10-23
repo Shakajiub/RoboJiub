@@ -44,6 +44,11 @@
             "enabled": true,
             "usage": "!shakait / s!shakait",
             "limit": 0
+        },
+        "roll": {
+            "enabled": true,
+            "usage": "s!roll (optional maximum)",
+            "limit": 0
         }
     },
     "cron": {
