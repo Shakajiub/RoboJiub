@@ -14,7 +14,11 @@ def gamble(args):
 
     viewer = args[1]
     viewer_points = get_viewer_value(viewer, queue, 'currency')
-    gamble_amount = int(user_input[1])
+
+    try:
+        gamble_amount = int(user_input[1])
+    except ValueError:
+        return "@{0} - That's not a valid number!".format(viewer)
 
     if viewer_points < gamble_amount:
         return "@{0} - You don't have enough {1}s for that!".format(viewer, currency_name)

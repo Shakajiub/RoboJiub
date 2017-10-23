@@ -26,7 +26,11 @@ def donate(args):
 
     viewer = args[1]
     recipient = user_input[1].lower()
-    donation_amount = int(user_input[2])
+
+    try:
+        donation_amount = int(user_input[2])
+    except ValueError:
+        return "@{0} - That's not a valid number!".format(viewer)
 
     validate = validate_donation(viewer, recipient, donation_amount, queue)
     if validate != "":
