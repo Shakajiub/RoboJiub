@@ -151,6 +151,8 @@ class RoboJiub:
                 message = "s!question {0}".format(message.split(' ', 1)[1])
             elif message.startswith("!shakait"):
                 message = "s!shakait " # There's a little problem, need a space/endline char here
+            elif message.startswith("hey yo pancake"):
+                message = "s!pancake " # Heard you got a month of prime
             else: return False
         return (username, message)
 
