@@ -4,7 +4,7 @@
         "port": 6667,
         "channel": "#shakajiub",
         "username": "robojiub",
-        "oauth_password": ""
+        "oauth_password": "oauth:"
     },
     "messages": {
         "enabled": false,
@@ -40,24 +40,9 @@
             "usage": "s!question (yes/no question)",
             "limit": 10
         },
-        "shakait": {
-            "enabled": true,
-            "usage": "!shakait / s!shakait",
-            "limit": 0
-        },
         "roll": {
             "enabled": true,
             "usage": "s!roll (optional maximum)",
-            "limit": 0
-        },
-        "pancake": {
-            "enabled": true,
-            "usage": "hey yo pancake",
-            "limit": 0
-        },
-        "nezhoni": {
-            "enabled": true,
-            "usage": "s!nezhoni",
             "limit": 0
         }
     },
