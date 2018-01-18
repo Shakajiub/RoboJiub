@@ -124,7 +124,8 @@ class RoboJiub:
             username, message = user_command[0], user_command[1]
             command_name = message[2:-1].split(' ')[0]
             if not self.check_command_enabled(command_name, queue):
-                continue
+                message = "s!custom {0}".format(message[2:])
+                command_name = "custom"
 
             args = (queue, username, message[:-1].split(' '))
             module = self.get_command_module(command_name, queue)
@@ -149,10 +150,6 @@ class RoboJiub:
         if not message.startswith("s!"):
             if message.startswith("@{0}".format(botname)): # Replace @bot with s!question
                 message = "s!question {0}".format(message.split(' ', 1)[1])
-            elif message.startswith("!shakait"):
-                message = "s!shakait " # There's a little problem, need a space/endline char here
-            elif message.startswith("hey yo pancake"):
-                message = "s!pancake " # Heard you got a month of prime
             else: return False
         return (username, message)
 
