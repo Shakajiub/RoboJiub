@@ -12,6 +12,8 @@ def get_mods():
     """Return the list of current mods in the chat."""
     # TODO - Fetch the list if it's None (only during the first minute since bot launch)
     global mods
+    if mods == None:
+        mods = ["shakajiub", "robojiub"]
     return mods
 
 def check_viewer_exists(viewer):
@@ -69,8 +71,9 @@ def award_viewer(viewer, amount, queue):
 
 def award_all_viewers(amount, queue):
     """Fetch the viewer list and award everyone with given amount of currency."""
-    config = get_config()
+    global mods
     mods = []
+    config = get_config()
     try:
         channel = config['irc']['channel'].replace('#', '')
         response = urlopen('http://tmi.twitch.tv/group/user/{0}/chatters'.format(channel))

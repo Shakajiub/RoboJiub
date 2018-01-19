@@ -171,7 +171,7 @@ class RoboJiub:
     def check_mod_only(self, command_name, viewer):
         """Return true if the command is for mods only and the caller is not a mod."""
         try:
-            if get_config()['commands'][command_name]['mods_only'] and viewer not in get_mods():
+            if get_config()['commands'][command_name]['mod_only'] and viewer not in get_mods():
                 return True
             else:
                 return False
