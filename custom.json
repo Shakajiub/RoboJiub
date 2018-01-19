@@ -1,5 +1,3 @@
 {
-    "test": "this is a simple custom command",
-    "another_one": "you can add/remove these on the fly when the bot is running",
-    "this_is_the_command": "and here's the response"
+    "source": "https://github.com/Shakajiub/RoboJiub"
 }

@@ -22,28 +22,28 @@
     "commands": {
         "points": {
             "enabled": true,
-            "usage": "s!points",
-            "limit": 0
+            "mod_only": false,
+            "usage": "s!points"
         },
         "gamble": {
             "enabled": true,
-            "usage": "s!gamble (amount)",
-            "limit": 60
+            "mod_only": false,
+            "usage": "s!gamble (amount)"
         },
         "donate": {
             "enabled": true,
-            "usage": "s!donate (recipient) (amount)",
-            "limit": 300
+            "mod_only": false,
+            "usage": "s!donate (recipient) (amount)"
         },
         "question": {
             "enabled": true,
-            "usage": "s!question (yes/no question)",
-            "limit": 10
+            "mod_only": false,
+            "usage": "s!question/@robojiub (yes/no question)"
         },
         "roll": {
             "enabled": true,
-            "usage": "s!roll (optional maximum)",
-            "limit": 0
+            "mod_only": false,
+            "usage": "s!roll (optional maximum)"
         }
     },
     "cron": {

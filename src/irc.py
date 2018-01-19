@@ -45,8 +45,8 @@ class IRC:
             return
         try:
             channel = get_channel()
-            if channel: # TODO - Start messages with "/me"
-                self.sock.send('PRIVMSG {0} :{1}\n'.format(channel, message.encode('utf-8')))
+            if channel:
+                self.sock.send('PRIVMSG {0} : {1}\n'.format(channel, message.encode('utf-8')))
         except Exception:
             self.queue.put(("{0}".format(sys.exc_info()[0]), 'BG_error'))
             self.queue.put(("irc.send_message() - Could not send message", 'BG_error'))

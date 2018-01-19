@@ -8,7 +8,7 @@ from src.irc import *
 from src.gui import *
 from src.commands import *
 from src.config.config import *
-from src.currency.currency import award_all_viewers
+from src.currency.currency import get_mods, award_all_viewers
 
 class RoboJiub:
     def __init__(self, root):
@@ -127,6 +127,9 @@ class RoboJiub:
                 message = "s!custom {0}".format(message[2:])
                 command_name = "custom"
 
+            if self.check_mod_only(command_name, username):
+                continue
+
             args = (queue, username, message[:-1].split(' '))
             module = self.get_command_module(command_name, queue)
             result = self.get_command_result(module, command_name, args, queue)
@@ -161,6 +164,16 @@ class RoboJiub:
             else:
                 queue.put(("Command '{0}' is disabled, ignoring request".format(
                             command_name), 'BG_progress'))
+                return False
+        except KeyError:
+            return False
+
+    def check_mod_only(self, command_name, viewer):
+        """Return true if the command is for mods only and the caller is not a mod."""
+        try:
+            if get_config()['commands'][command_name]['mods_only'] and viewer not in get_mods():
+                return True
+            else:
                 return False
         except KeyError:
             return False

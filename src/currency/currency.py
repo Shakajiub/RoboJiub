@@ -5,6 +5,15 @@ import errno
 from urllib2 import urlopen, URLError
 from src.config.config import get_config
 
+global mods
+mods = None
+
+def get_mods():
+    """Return the list of current mods in the chat."""
+    # TODO - Fetch the list if it's None (only during the first minute since bot launch)
+    global mods
+    return mods
+
 def check_viewer_exists(viewer):
     """Return true if we have a json file for given viewer."""
     return os.path.isfile('./viewers/' + viewer + '.json')
@@ -61,6 +70,7 @@ def award_viewer(viewer, amount, queue):
 def award_all_viewers(amount, queue):
     """Fetch the viewer list and award everyone with given amount of currency."""
     config = get_config()
+    mods = []
     try:
         channel = config['irc']['channel'].replace('#', '')
         response = urlopen('http://tmi.twitch.tv/group/user/{0}/chatters'.format(channel))
@@ -69,6 +79,8 @@ def award_all_viewers(amount, queue):
         for category in parsed_json['chatters']:
             for viewer in parsed_json['chatters'][category]:
                 award_viewer(viewer, amount, queue)
+                if category == "moderators":
+                    mods.append(viewer)
     except KeyError:
         queue.put(("award_all_viewers() - IRC config is corrupted", 'BG_error'))
     except URLError:
