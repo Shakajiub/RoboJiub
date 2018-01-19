@@ -44,6 +44,11 @@
             "enabled": true,
             "mod_only": false,
             "usage": "s!roll (optional maximum)"
+        },
+        "bonus": {
+            "enabled": true,
+            "mod_only": true,
+            "usage": "s!bonus (recipient) (amount)"
         }
     },
     "cron": {
