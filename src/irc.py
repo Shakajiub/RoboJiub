@@ -12,6 +12,9 @@ class IRC:
         """Send a goodbye message through irc and close the socket."""
         try:
             self.send_custom_message('goodbye')
+            channel = get_channel()
+            if channel:
+                self.sock.send('PART {0}\r\n'.format(channel))
             self.sock.close()
         except Exception:
             self.queue.put(("{0}".format(sys.exc_info()[0]), 'BG_error'))
