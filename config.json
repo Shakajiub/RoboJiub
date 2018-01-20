@@ -49,6 +49,11 @@
             "enabled": true,
             "mod_only": true,
             "usage": "s!bonus (recipient) (amount)"
+        },
+        "gettime": {
+            "enabled": true,
+            "mod_only": false,
+            "usage": "s!time (place)"
         }
     },
     "cron": {
