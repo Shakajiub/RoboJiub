@@ -22,38 +22,31 @@
     "commands": {
         "points": {
             "enabled": true,
-            "mod_only": false,
-            "usage": "s!points"
+            "mod_only": false
         },
         "gamble": {
             "enabled": true,
-            "mod_only": false,
-            "usage": "s!gamble (amount)"
+            "mod_only": false
         },
         "donate": {
             "enabled": true,
-            "mod_only": false,
-            "usage": "s!donate (recipient) (amount)"
+            "mod_only": false
         },
         "question": {
             "enabled": true,
-            "mod_only": false,
-            "usage": "@robojiub (yes/no question)"
+            "mod_only": false
         },
         "roll": {
             "enabled": true,
-            "mod_only": false,
-            "usage": "s!roll (max)"
+            "mod_only": false
         },
         "bonus": {
             "enabled": true,
-            "mod_only": true,
-            "usage": "s!bonus (recipient) (amount)"
+            "mod_only": true
         },
         "gettime": {
             "enabled": true,
-            "mod_only": false,
-            "usage": "s!time (place/timezone)"
+            "mod_only": false
         }
     },
     "cron": {

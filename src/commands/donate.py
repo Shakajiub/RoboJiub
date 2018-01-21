@@ -1,40 +1,34 @@
 from src.currency.currency import *
 
-def validate_donation(viewer, recipient, donation, queue):
-    """Return an empty string on a success or a string explaining the reason for failure."""
-    if not check_viewer_exists(recipient):
-        return "@{0} - Cannot find donation target!"
+def donate(args):
+    """Move points from one viewer (caller) to another."""
+    usage = "usage: s!donate (recipient) (amount)"
 
-    donation_amount = int(donation)
+    if len(args[2]) != 3:
+        return usage
+
+    queue = args[0]
+    viewer = args[1]
+    message = args[2]
+
+    if not message[2].isdigit():
+        return "@{0} - Invalid amount.".format(viewer)
+
+    recipient = message[1].lower()
+    donation_amount = int(message[2])
+
+    if not check_viewer_exists(recipient):
+        return "@{0} - Cannot find donation target.".format(viewer)
+
     if donation_amount < 1:
-        return "@{0} - Minimum donation amount is 1!"
+        return "@{0} - Minimum donation amount is 1!".format(viewer)
+
+    currency_name = get_currency(queue)
+    if not currency_name:
+        return None # None is returned on internal errors
 
     if get_viewer_value(viewer, queue, 'currency') < donation_amount:
-        return "@{0} - You don't have enough {1}s for that!"
-    return ""
-
-def donate(args):
-    """Return a string explaining if the donation was succesful."""
-    if len(args[2]) != 3:
-        return False
-    queue = args[0]
-    user_input = args[2]
-
-    currency_name = validate_currency(user_input[2], queue)
-    if not currency_name:
-        return currency_name
-
-    viewer = args[1]
-    recipient = user_input[1].lower()
-
-    try:
-        donation_amount = int(user_input[2])
-    except ValueError:
-        return "@{0} - That's not a valid number!".format(viewer)
-
-    validate = validate_donation(viewer, recipient, donation_amount, queue)
-    if validate != "":
-        return validate.format(viewer, currency_name)
+        return "@{0} - You don't have enough {1}s for that!".format(viewer, currency_name)
 
     award_viewer(viewer, -donation_amount, queue)
     award_viewer(recipient, donation_amount, queue)

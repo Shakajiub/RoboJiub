@@ -2,30 +2,29 @@ from random import randrange
 from src.currency.currency import *
 
 def gamble(args):
-    """Return a string explaining if and how much currency the caller won/lost."""
+    """Gamble a given amount of points. 60 percent chance to lose, 40 to win."""
+    usage = "usage: s!gamble (amount)"
+
     if len(args[2]) != 2:
-        return False
+        return usage
+
     queue = args[0]
-    user_input = args[2]
-
-    currency_name = validate_currency(user_input[1], queue)
-    if not currency_name:
-        return currency_name
-
     viewer = args[1]
-    viewer_points = get_viewer_value(viewer, queue, 'currency')
+    message = args[2]
 
-    try:
-        gamble_amount = int(user_input[1])
-    except ValueError:
-        return "@{0} - That's not a valid number!".format(viewer)
+    if not message[1].isdigit():
+        return "@{0} - Invalid amount.".format(viewer)
+
+    currency_name = get_currency(queue)
+    if not currency_name:
+        return None # None is returned on internal errors
+
+    viewer_points = get_viewer_value(viewer, queue, 'currency')
+    gamble_amount = int(message[1])
 
     if viewer_points < gamble_amount:
         return "@{0} - You don't have enough {1}s for that!".format(viewer, currency_name)
-    return randomize_award(queue, viewer, viewer_points, gamble_amount, currency_name)
 
-def randomize_award(queue, viewer, viewer_points, gamble_amount, currency_name):
-    """Randomize the gamble reward and return the main reward string for the viewer."""
     random_roll = randrange(1, 100)
 
     if random_roll == 100:

@@ -1,26 +1,28 @@
 from src.currency.currency import *
 
 def bonus(args):
-    """Return a string explaining if the bonus was successful."""
+    """Award extra points to given viewer. Generally mod-only."""
+    usage = "usage: s!bonus (recipient) (amount)"
+
     if len(args[2]) != 3:
-        return False
+        return usage
+
     queue = args[0]
-    user_input = args[2]
-
-    currency_name = validate_currency(user_input[2], queue)
-    if not currency_name: # This can be False or None
-        return currency_name
-
     viewer = args[1]
-    recipient = user_input[1].lower()
+    message = args[2]
 
-    try:
-        donation_amount = int(user_input[2])
-    except ValueError:
-        return "@{0} - That's not a valid number!".format(viewer)
+    if not message[2].isdigit():
+        return "@{0} - Invalid amount.".format(viewer)
+
+    recipient = message[1].lower()
+    donation_amount = int(message[2])
 
     if not check_viewer_exists(recipient):
-        return "@{0} - Cannot find donation target!"
+        return "@{0} - Cannot find bonus target.".format(viewer)
+
+    currency_name = get_currency(queue)
+    if not currency_name:
+        return None # None is returned on internal errors
 
     award_viewer(recipient, donation_amount, queue)
     return "@{0} - Awarded {1} {2}{3} to @{4}!".format(

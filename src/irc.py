@@ -61,8 +61,7 @@ class IRC:
             if config['messages']['enabled']:
                 self.send_message(config['messages'][message])
         except KeyError:
-            self.queue.put(("irc.send_custom_message() - Could not send message '{0}'".format(
-                            message), 'BG_error'))
+            self.queue.put(("irc.send_custom_message() - Could not send message '{0}'".format(message), 'BG_error'))
 
     def get_message(self, data):
         """Return a dictionary containing the 'username' and the 'message' from given data."""

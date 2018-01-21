@@ -85,7 +85,7 @@ class RoboGUI:
             except Queue.Empty: pass
 
     def manual_post(self):
-        """Post a custom message as the bot (clear the input text box)."""
+        """Post a custom message as the bot (and clear the input text box)."""
         log_msg = self.manual_text_box.get('1.0', tk.END).replace('\n', ' ')
         if len(log_msg.strip(' ')) > 0:
             botname = get_botname()

@@ -80,14 +80,12 @@ class RoboJiub:
         config = get_config()
         current_time = time.time()
         try:
-            if config['currency']['enabled']:
-                if current_time - self.currency_timer > config['currency']['timer']:
-                    if config['currency']['log']:
-                        self.queue.put(("Awarding currency to current viewers", 'BG_progress'))
-                    self.currency_timer = current_time
-                    thread_currency = threading.Thread(target=award_all_viewers,
-                                args=(config['currency']['amount'], self.queue))
-                    thread_currency.start()
+            if config['currency']['enabled'] and current_time - self.currency_timer > config['currency']['timer']:
+                if config['currency']['log']:
+                    self.queue.put(("Awarding currency to current viewers", 'BG_progress'))
+                self.currency_timer = current_time
+                thread = threading.Thread(target=award_all_viewers, args=(config['currency']['amount'], self.queue))
+                thread.start()
         except KeyError:
             self.queue.put(("update_currency() - Currency config is corrupted", 'BG_error'))
 
@@ -106,6 +104,7 @@ class RoboJiub:
     def robo_main(self):
         """Handle messages received via irc socket (main function of the bot, basically)."""
         config = get_config()
+
         irc = self.irc
         sock = self.socket
         queue = self.queue
@@ -117,11 +116,11 @@ class RoboJiub:
                 sock = self.irc.get_socket_object()
 
             irc.check_for_ping(data)
-            user_command = self.check_for_command(irc, data, queue)
-            if not user_command:
+            command = self.check_for_command(irc, data, queue)
+            if not command:
                 continue
 
-            username, message = user_command[0], user_command[1]
+            username, message = command[0], command[1]
             command_name = message[2:-1].split(' ')[0]
             if not self.check_command_enabled(command_name, queue):
                 message = "s!custom {0}".format(message[2:])
@@ -132,7 +131,7 @@ class RoboJiub:
 
             args = (queue, username, message[:-1].split(' '))
             module = self.get_command_module(command_name, queue)
-            result = self.get_command_result(module, command_name, args, queue)
+            result = self.get_command_result(module, command_name, args)
             irc.send_message(result)
 
     def check_for_command(self, irc, data, queue):
@@ -157,13 +156,12 @@ class RoboJiub:
         return (username, message)
 
     def check_command_enabled(self, command_name, queue):
-        """Return true if the given command is enabled."""
+        """Check if the given command is enabled."""
         try:
             if get_config()['commands'][command_name]['enabled']:
                 return True
             else:
-                queue.put(("Command '{0}' is disabled, ignoring request".format(
-                            command_name), 'BG_progress'))
+                queue.put(("Command '{0}' is disabled, ignoring request".format(command_name), 'BG_progress'))
                 return False
         except KeyError:
             return False
@@ -184,22 +182,19 @@ class RoboJiub:
             module = importlib.import_module('src.commands.{0}'.format(command_name))
             return module
         except ImportError:
-            queue.put(("get_command_module() - Could not import module '{0}'".format(
-                        command_name), 'BG_error'))
+            queue.put(("get_command_module() - Could not import module '{0}'".format(command_name), 'BG_error'))
         return None
 
-    def get_command_result(self, module, command_name, args, queue):
+    def get_command_result(self, module, command_name, args):
         """Return the result (string) from given command in given module."""
         config = get_config()
+        queue = args[0]
         try:
             result = getattr(module, command_name)(args)
-            if result == None: # Commands return None if there was an error
+            if not result: # Commands return None if there was an error in the code
                 return None
-            if result == False: # Commands return False if called incorrectly
-                result = "command usage: {0}".format(config['commands'][command_name]['usage'])
             queue.put(("[{0}]: {1}".format(config['irc']['username'], result), 'BG_chat'))
             return result
         except AttributeError:
-            queue.put(("get_command_result() - No function found in module '{0}'".format(
-                        command_name), 'BG_error'))
+            queue.put(("get_command_result() - No function found in module '{0}'".format(command_name), 'BG_error'))
         return None

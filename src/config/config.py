@@ -4,7 +4,7 @@ global config
 config = None
 
 def get_config(force_reload=False):
-    """Return the json config file. Load it if first time or forced."""
+    """Get the main json config file. Load it if first time or forced."""
     global config
     if config == None or force_reload:
         with open('config.json') as config_file:
@@ -12,7 +12,7 @@ def get_config(force_reload=False):
     return config
 
 def get_botname():
-    """Return the name of the bot as set up in the config."""
+    """Get the name of the bot as set up in the config."""
     botname = "botname"
     try:
         botname = get_config()['irc']['username']
@@ -21,10 +21,10 @@ def get_botname():
     return botname
 
 def get_channel():
-    """Return the name of the main channel as set up in the config. False if not set up."""
+    """Get the name of the main channel as set up in the config."""
+    channel = None
     try:
         channel = get_config()['irc']['channel']
-        return channel
     except KeyError:
         self.queue.put(("config.get_channel() - IRC config is corrupted", 'BG_error'))
-        return False
+    return channel
