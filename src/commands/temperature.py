@@ -10,15 +10,18 @@ def temperature(args):
 
     if message[2][0] == '-':
         if not message[2][1:].isdigit():
-            return "@{0} - Invalid amount. 1".format(viewer)
+            return "@{0} - Invalid amount.".format(viewer)
     elif not message[2].isdigit():
-        return "@{0} - Invalid amount. 2".format(viewer)
+        return "@{0} - Invalid amount.".format(viewer)
 
     scale_to = message[1]
     scale_from = message[3]
 
     if scale_to[0] == scale_from:
         return "@{0} - That's a bit silly.".format(viewer)
+
+    if scale_from not in ['c', 'f', 'k']:
+        return usage
 
     temp_to = 0
     temp_from = int(message[2])
