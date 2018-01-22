@@ -116,12 +116,19 @@ class RoboJiub:
                 sock = self.irc.get_socket_object()
 
             irc.check_for_ping(data)
+            #irc.check_for_notice(data)
+
             command = self.check_for_command(irc, data, queue)
             if not command:
                 continue
 
             username, message = command[0], command[1]
             command_name = message[2:-1].split(' ')[0]
+
+            if command_name in ["celsius", "fahrenheit", "kelvin"]:
+                message = "s!temperature {0}".format(message[2:].lower())
+                command_name = "temperature"
+
             if not self.check_command_enabled(command_name, queue):
                 message = "s!custom {0}".format(message[2:])
                 command_name = "custom"
@@ -191,7 +198,7 @@ class RoboJiub:
         queue = args[0]
         try:
             result = getattr(module, command_name)(args)
-            if not result: # Commands return None if there was an error in the code
+            if result == None: # Commands return None if there was an error in the code
                 return None
             queue.put(("[{0}]: {1}".format(config['irc']['username'], result), 'BG_chat'))
             return result

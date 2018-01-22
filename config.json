@@ -47,6 +47,10 @@
         "gettime": {
             "enabled": true,
             "mod_only": false
+        },
+        "temperature": {
+            "enabled": true,
+            "mod_only": false
         }
     },
     "cron": {
