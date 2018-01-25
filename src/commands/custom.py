@@ -14,8 +14,12 @@ def custom(args):
         queue.put(("custom() - Could not load json", 'BG_error'))
         return None
 
+    replace = ""
+    if len(args[2]) > 2:
+        replace = args[2][2]
+
     cmd = args[2][1]
     try:
-        return "{0}".format(custom_commands[cmd])
+        return "{0}".format(custom_commands[cmd]).format(replace)
     except KeyError:
         return None
