@@ -23,21 +23,18 @@ def ddg(args):
 
         if len(parsed_json['Redirect']) > 0:
             result = parsed_json['Redirect']
-            raise UnboundLocalError
+        else:
+            source = " Source: ???"
+            abstract = parsed_json['Abstract']
 
-        source = " Source: ???"
-        abstract = parsed_json['Abstract']
+            if len(parsed_json['AbstractURL']) > 0:
+                source = " Source: " + parsed_json['AbstractURL']
 
-        if len(parsed_json['AbstractURL']) > 0:
-            source = " Source: " + parsed_json['AbstractURL']
+            if len(abstract) > 0:
+                if (len(abstract) > (420 - len(source))):
+                    result = abstract[:(420 - len(source))] + " (...)" + source
+                else: result = abstract + source
 
-        if len(abstract) > 0:
-            if (len(abstract) > (420 - len(source))):
-                result = abstract[:(420 - len(source))] + " (...)" + source
-            else: result = abstract + source
-
-    except UnboundLocalError:
-        pass
     except KeyError:
         queue.put(("ddg() - Error parsing DDG json!", 'BG_error'))
     except URLError:
