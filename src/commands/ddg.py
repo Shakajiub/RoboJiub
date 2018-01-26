@@ -21,7 +21,7 @@ def ddg(args):
         response = urlopen('https://api.duckduckgo.com/?q={0}&format=json'.format(query))
         parsed_json = json.loads(response.read())
 
-        source = "?"
+        source = " Source: ???"
         abstract = parsed_json['Abstract']
 
         if len(parsed_json['AbstractURL']) > 0:

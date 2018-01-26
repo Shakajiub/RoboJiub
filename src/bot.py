@@ -197,11 +197,11 @@ class RoboJiub:
         config = get_config()
         queue = args[0]
         try:
-            result = getattr(module, command_name)(args)
+            result = getattr(module, command_name)(args).encode('utf-8')
             if result == None: # Commands return None if there was an error in the code
                 return None
             queue.put(("[{0}]: {1}".format(config['irc']['username'], result), 'BG_chat'))
-            return result
+            return result.decode('utf-8')
         except AttributeError:
             queue.put(("get_command_result() - No function found in module '{0}'".format(command_name), 'BG_error'))
         return None
