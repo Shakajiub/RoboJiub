@@ -33,7 +33,7 @@
             "mod_only": false
         },
         "question": {
-            "enabled": true,
+            "enabled": false,
             "mod_only": false
         },
         "roll": {
@@ -55,6 +55,10 @@
         "bet": {
             "enabled": true,
             "mod_only": false
+        },
+        "quote": {
+            "enabled": true,
+            "mod_only": true
         }
     },
     "cron": {

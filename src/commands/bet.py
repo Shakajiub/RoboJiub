@@ -17,9 +17,10 @@ def bet(args):
     # Moderators will manage the flow of the bet with these commands:
     # s!bet start : starts the betting system
     # s!bet close : closes the bets, no new bets will be accepted
+    # s!bet open : opens the bets again to accept more bets
     # s!bet end (score) : ends the bet, closest better to (score) wins
 
-    if message[1] in ["start", "close", "end"]:
+    if message[1] in ["start", "close", "end", "open"]:
         if viewer not in get_mods():
             return None
 
@@ -29,8 +30,12 @@ def bet(args):
             return end_bet(message, args[0])
 
         elif bets != None:
-            bets['closed'] = True
-            return "The bets have been closed! No new bets will be accepted!"
+            if message[1][0] == 'o':
+                bets['closed'] = False
+                return  "The bets have been opened! Still more time to bet!"
+            else:
+                bets['closed'] = True
+                return "The bets have been closed! No new bets will be accepted!"
         else: return None
 
     # "bets" is None when there is no bet running, otherwise it's a dictionary of viewer bets
@@ -53,7 +58,7 @@ def bet(args):
     # If all is good, accept a new bet from a viewer
     elif viewer not in bets:
         bets[viewer] = int(message[1])
-        return "@{0} - Bet registered!".format(viewer)
+        return "@{0} - Bet registered! ({1})".format(viewer, message[1])
     else: return "@{0} - You have already bet!".format(viewer)
 
 def start_bet():
@@ -73,7 +78,9 @@ def end_bet(message, queue):
     if not score.isdigit():
         return None
 
-    if len(bets) == 1:
+    betters = len(bets) - 1
+
+    if betters == 0:
         bets = None
         return "The bet has ended! No winners!"
 
@@ -81,5 +88,5 @@ def end_bet(message, queue):
     key, value = min(bets.items(), key=lambda(_, v): abs(v - int(score)))
     bets = None
 
-    award_viewer(key, 100, queue)
-    return "The bet has ended! The winner is @{0}! You won 100 points!".format(key)
+    award_viewer(key, betters * 50, queue)
+    return "!bonus {0} {1} - The bet has ended! The winner is @{0}! You've won {1} miles!".format(key, betters * 50)
