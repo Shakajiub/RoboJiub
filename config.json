@@ -59,6 +59,10 @@
         "quote": {
             "enabled": true,
             "mod_only": true
+        },
+        "ddg": {
+            "enabled": true,
+            "mod_only": true
         }
     },
     "cron": {
