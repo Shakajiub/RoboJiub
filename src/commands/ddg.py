@@ -18,8 +18,12 @@ def ddg(args):
     result = "@{0} - Sorry, I could not find anything with that query.".format(viewer)
 
     try:
-        response = urlopen('https://api.duckduckgo.com/?q={0}&format=json'.format(query))
+        response = urlopen('https://api.duckduckgo.com/?q={0}&format=json&t=robojiub&no_redirect=1'.format(query))
         parsed_json = json.loads(response.read())
+
+        if len(parsed_json['Redirect']) > 0:
+            result = parsed_json['Redirect']
+            raise UnboundLocalError
 
         source = " Source: ???"
         abstract = parsed_json['Abstract']
@@ -32,6 +36,8 @@ def ddg(args):
                 result = abstract[:(420 - len(source))] + " (...)" + source
             else: result = abstract + source
 
+    except UnboundLocalError:
+        pass
     except KeyError:
         queue.put(("ddg() - Error parsing DDG json!", 'BG_error'))
     except URLError:
