@@ -1,4 +1,10 @@
 {
     "source": "https://github.com/Shakajiub/RoboJiub",
-    "hug": "GivePLZ <3 {0} <3 TakeNRG"
+    "hug": "GivePLZ <3 {0} <3 TakeNRG",
+    "ping": "beep boop MrDestructoid",
+    "youtube": "https://www.youtube.com/channel/UC_YSfxfI35EvvxZFouBGTfQ",
+    "discord": "https://discord.gg/WN2eJeb",
+    "kitty": "https://i.imgur.com/zTcLQjC.png",
+    "dab": "Squid1 Squid3 Squid4",
+    "commands": "(prefix: s!) source, points, gamble, donate, ping, roll, bet, gettime, youtube, discord, dab, hug, kitty, celsius, fahrenheit, kelvin"
 }
