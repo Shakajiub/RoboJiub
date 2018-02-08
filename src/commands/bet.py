@@ -5,11 +5,11 @@ bets = None
 
 def bet(args):
     """Allow viewers to bet on anything, award points to closest guess."""
-    usage = "usage: s!bet (amount)/check"
+    usage = "usage: s!bet (score)"
     global bets
 
     if len(args[2]) < 2:
-        return None
+        return usage
 
     viewer = args[1]
     message = args[2]
@@ -32,11 +32,17 @@ def bet(args):
         elif bets != None:
             if message[1][0] == 'o':
                 bets['closed'] = False
-                return  "The bets have been opened! Still more time to bet!"
+                return  '[Bets re-opened] - Set your bets with "s!bet (score)" PogChamp'
             else:
                 bets['closed'] = True
-                return "The bets have been closed! No new bets will be accepted!"
+                return "[Bets closed] - No new bets will be accepted!"
         else: return None
+
+    elif message[1] == "cancel":
+        if viewer not in get_mods() or bets == None:
+            return None
+        bets = None
+        return "[Bets cancelled] - No winners!"
 
     # "bets" is None when there is no bet running, otherwise it's a dictionary of viewer bets
     elif bets == None:
@@ -53,7 +59,7 @@ def bet(args):
         return "@{0} - The bets have been closed! Wait for the next game.".format(viewer)
 
     elif not message[1].isdigit():
-        return "@{0} - Invalid amount.".format(viewer)
+        return "@{0} - Invalid bet.".format(viewer)
 
     # If all is good, accept a new bet from a viewer
     elif viewer not in bets:
@@ -67,7 +73,7 @@ def start_bet():
         return "A bet is already running!"
 
     bets = { 'closed': False }
-    return 'A bet has started! Set your bets with "s!bet (score)" PogChamp'
+    return '[Bets started] - Set your bets with "s!bet (score)" PogChamp'
 
 def end_bet(message, queue):
     global bets
@@ -89,4 +95,4 @@ def end_bet(message, queue):
     bets = None
 
     award_viewer(key, betters * 50, queue)
-    return "!bonus {0} {1} - The bet has ended! The winner is @{0}! You've won {1} miles!".format(key, betters * 50)
+    return "!bonus {0} {1} - The bet has ended! The winner is @{0}! (guess: {2}) You won {1} miles!".format(key, betters * 50, value)

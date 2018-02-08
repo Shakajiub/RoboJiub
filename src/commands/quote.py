@@ -5,7 +5,7 @@ from datetime import datetime
 
 def quote(args):
     """Save a quote or reference an old one."""
-    usage = "s!quote (text)"
+    usage = "usage: s!quote (text)"
 
     if len(args[2]) < 2:
         return usage
@@ -32,7 +32,6 @@ def quote(args):
     elif message[1] != "add":
         return usage
 
-    quotes_file = None
     try:
         with open('quotes.json', 'r') as quotes_file:
             quotes = json.load(quotes_file)

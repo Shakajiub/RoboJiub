@@ -4,7 +4,7 @@ from urllib2 import urlopen, URLError
 
 def ddg(args):
     """Get the abstract text from DuckDuckGo api for given query."""
-    usage = "s!ddg (query)"
+    usage = "usage: s!ddg (query)"
 
     if len(args[2]) < 2:
         return usage

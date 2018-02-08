@@ -19,6 +19,13 @@
         "startwith": 10,
         "log": true
     },
+    "cron": {
+        "currency": {
+            "enabled": false,
+            "message": "You earn 1 point every minute here. Type s!points to check your points!",
+            "timer": 1800
+        }
+    },
     "commands": {
         "points": {
             "enabled": true,
@@ -33,7 +40,7 @@
             "mod_only": false
         },
         "question": {
-            "enabled": false,
+            "enabled": true,
             "mod_only": false
         },
         "roll": {
@@ -63,13 +70,6 @@
         "ddg": {
             "enabled": true,
             "mod_only": true
-        }
-    },
-    "cron": {
-        "currency": {
-            "enabled": false,
-            "message": "You earn 1 point every minute here. Type s!points to check your points!",
-            "timer": 1800
         }
     }
 }

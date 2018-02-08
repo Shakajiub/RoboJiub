@@ -157,9 +157,10 @@ class RoboJiub:
         self.cron_value = 1
 
         if not message.startswith("s!"):
-            if message.startswith("@{0}".format(botname)): # Replace @bot with s!question
-                message = "s!question {0}".format(message.split(' ', 1)[1])
-            else: return False
+#            if message.startswith("@{0}".format(botname)): # Replace @bot with s!question
+#                message = "s!question {0}".format(message.split(' ', 1)[1])
+#            else: return False
+            return False
         return (username, message)
 
     def check_command_enabled(self, command_name, queue):
@@ -197,11 +198,11 @@ class RoboJiub:
         config = get_config()
         queue = args[0]
         try:
-            result = getattr(module, command_name)(args).encode('utf-8')
+            result = getattr(module, command_name)(args)
             if result == None: # Commands return None if there was an error in the code
                 return None
-            queue.put(("[{0}]: {1}".format(config['irc']['username'], result), 'BG_chat'))
-            return result.decode('utf-8')
+            queue.put(("[{0}]: {1}".format(config['irc']['username'], result.encode('utf-8')), 'BG_chat'))
+            return result#.decode('utf-8')
         except AttributeError:
             queue.put(("get_command_result() - No function found in module '{0}'".format(command_name), 'BG_error'))
         return None
