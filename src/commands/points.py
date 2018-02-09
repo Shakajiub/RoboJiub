@@ -15,4 +15,4 @@ def points(args):
         return None # None is returned on internal errors
 
     currency = get_viewer_value(viewer, queue, 'currency')
-    return "@{0} - You have {1} {2}{3}!".format(viewer, currency, currency_name, "s" if currency != 1 else "")
+    return "@{0} - You have {1} {2}{3}!".format(viewer, '{:,}'.format(currency), currency_name, "s" if currency != 1 else "")

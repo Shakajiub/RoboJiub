@@ -5,7 +5,7 @@ from datetime import datetime
 
 def quote(args):
     """Save a quote or reference an old one."""
-    usage = "usage: s!quote (text)"
+    usage = "usage: s!quote (number)"
 
     if len(args[2]) < 2:
         return usage

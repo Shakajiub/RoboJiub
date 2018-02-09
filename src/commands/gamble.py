@@ -30,15 +30,15 @@ def gamble(args):
     if random_roll == 100:
         award_viewer(viewer, gamble_amount * 2, queue)
         return "@{0} - Rolled 100! Won {1} {2}s, you now have {3} {2}s!".format(
-            viewer, gamble_amount * 3, currency_name, viewer_points + (gamble_amount * 2)
+            viewer, '{:,}'.format(gamble_amount * 3), currency_name, '{:,}'.format(viewer_points + (gamble_amount * 2))
         )
     elif random_roll > 59:
         award_viewer(viewer, gamble_amount, queue)
         return "@{0} - Rolled {1}! Won {2} {3}s, you now have {4} {3}s!".format(
-            viewer, random_roll, gamble_amount * 2, currency_name, viewer_points + gamble_amount
+            viewer, random_roll, '{:,}'.format(gamble_amount * 2), currency_name, '{:,}'.format(viewer_points + gamble_amount)
         )
     else:
         award_viewer(viewer, -gamble_amount, queue)
         return "@{0} - Rolled {1}! Lost {2} {3}s, you now have {4} {3}s.".format(
-            viewer, random_roll, gamble_amount, currency_name, viewer_points - gamble_amount
+            viewer, random_roll, '{:,}'.format(gamble_amount), currency_name, '{:,}'.format(viewer_points - gamble_amount)
         )

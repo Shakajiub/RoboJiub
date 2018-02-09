@@ -14,4 +14,4 @@ def roll(args):
         if max_roll < 2:
             return "@{0} - Minimum roll max is 2!".format(args[1])
 
-    return "@{0} - Rolled {1}! (d{2})".format(args[1], randrange(1, max_roll), max_roll)
+    return "@{0} - Rolled {1}! (d{2})".format(args[1], '{:,}'.format(randrange(1, max_roll)), max_roll)

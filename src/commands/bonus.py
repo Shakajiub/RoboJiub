@@ -26,5 +26,5 @@ def bonus(args):
 
     award_viewer(recipient, donation_amount, queue)
     return "@{0} - Awarded {1} {2}{3} to @{4}!".format(
-        viewer, donation_amount, currency_name, "s" if donation_amount != 1 else "", recipient
+        viewer, '{:,}'.format(donation_amount), currency_name, "s" if donation_amount != 1 else "", recipient
     )
