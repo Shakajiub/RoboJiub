@@ -157,10 +157,9 @@ class RoboJiub:
         self.cron_value = 1
 
         if not message.startswith("s!"):
-#            if message.startswith("@{0}".format(botname)): # Replace @bot with s!question
-#                message = "s!question {0}".format(message.split(' ', 1)[1])
-#            else: return False
-            return False
+            if message.startswith("@{0}".format(botname)): # Replace @bot with s!question
+                message = "s!question {0}".format(message)
+            else: return False
         return (username, message)
 
     def check_command_enabled(self, command_name, queue):

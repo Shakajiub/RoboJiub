@@ -70,6 +70,10 @@
         "ddg": {
             "enabled": true,
             "mod_only": true
+        },
+        "commands": {
+            "enabled": true,
+            "mod_only": false
         }
     }
 }

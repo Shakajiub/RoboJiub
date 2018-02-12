@@ -15,7 +15,8 @@ def ddg(args):
 
     del message[0]
     query = "+".join(message)
-    result = "@{0} - Sorry, I could not find anything with that query.".format(viewer)
+    result = "INSUFFICIENT DATA FOR MEANINGFUL ANSWER."
+    #result = "@{0} - Sorry, I could not find anything with that query.".format(viewer)
 
     try:
         response = urlopen('https://api.duckduckgo.com/?q={0}&format=json&t=robojiub&no_redirect=1'.format(query))

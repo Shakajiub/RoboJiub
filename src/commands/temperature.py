@@ -1,6 +1,6 @@
 def temperature(args):
     """Convert given temperature from one scale to another."""
-    usage = "usage: s!(celsius/fahrenheit/kelvin) (temperature) (C/F/K)"
+    usage = "usage: s!celsius/fahrenheit/kelvin (temp) C/F/K"
 
     if len(args[2]) != 4:
         return usage
@@ -10,9 +10,9 @@ def temperature(args):
 
     if message[2][0] == '-':
         if not message[2][1:].isdigit():
-            return "@{0} - Invalid amount.".format(viewer)
+            return "@{0} - Invalid temperature.".format(viewer)
     elif not message[2].isdigit():
-        return "@{0} - Invalid amount.".format(viewer)
+        return "@{0} - Invalid temperature.".format(viewer)
 
     scale_to = message[1]
     scale_from = message[3]
