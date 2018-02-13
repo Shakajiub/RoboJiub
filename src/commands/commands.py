@@ -22,7 +22,8 @@ def commands(args):
         if config['commands'][cmd]['enabled']:
             cmds = cmds + cmd + ", "
 
-    for cmd in custom_commands:
-        cmds = cmds + cmd + ", "
+    if custom_commands != None:
+        for cmd in custom_commands:
+            cmds = cmds + cmd + ", "
 
     return cmds[:-2]

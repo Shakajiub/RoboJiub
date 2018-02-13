@@ -1,37 +1,19 @@
 import sys
 import json
 
+from random import choice
 from datetime import datetime
+from src.currency.currency import get_mods
 
 def quote(args):
     """Save a quote or reference an old one."""
-    usage = "usage: s!quote (number)"
-
-    if len(args[2]) < 2:
-        return usage
+    usage = "usage: s!quote (ID/text)"
 
     queue = args[0]
     viewer = args[1]
     message = args[2]
 
     quotes = None
-
-    if message[1] in ["edit", "remove"]:
-        return "TODO"
-
-    elif message[1].isdigit():
-        try:
-            with open('quotes.json', 'r') as quotes_file:
-                quotes = json.load(quotes_file)
-            if quotes[message[1]]:
-                return "Quote #{0}: {1}".format(message[1], quotes[message[1]])
-            else: return "Sorry, I could not find that quote."
-        except Exception:
-            return "Sorry, I could not find that quote."
-
-    elif message[1] != "add":
-        return usage
-
     try:
         with open('quotes.json', 'r') as quotes_file:
             quotes = json.load(quotes_file)
@@ -40,15 +22,49 @@ def quote(args):
         queue.put(("quotes() - Could not load json", 'BG_error'))
         return None
 
-    del message[0]
-    del message[0]
-    quote = " ".join(message)
+    response = "Sorry, I could not find that quote."
 
-    num = len(quotes)
-    date = datetime.now()
-    quotes[num] = '"' + quote + '" [' + date.strftime('%Y-%m-%d') + ']'
+    if len(args[2]) == 1: # Get a random quote
+        try:
+            key = choice(quotes.keys())
+            return "Quote #{0}: {1}".format(key, quotes[key])
+        except Exception:
+            return response
 
-    with open('quotes.json', 'w') as quotes_file:
-        json.dump(quotes, quotes_file)
+    elif message[1].isdigit(): # Get a quote by ID
+        try:
+            return "Quote #{0}: {1}".format(message[1], quotes[message[1]])
+        except Exception:
+            return response
 
-    return "{0} - Quote #{1} saved!".format(viewer, num)
+    elif message[1] not in ["add", "edit", "remove"]: # Get a quote that contains given text
+        del message[0] # "s!quote"
+        for quote in quotes:
+            if " ".join(message) in quotes[quote]:
+                response = "Quote #{0}: {1}".format(quote, quotes[quote])
+                break
+        return response
+
+    if viewer not in get_mods(): # Only moderators can access the advanced commands below
+        return None
+
+    if message[1] in ["edit", "remove"]:
+        return "TODO"
+
+    elif message[1] == "add":
+        if len(message) < 3:
+            return "usage: s!quote add (quote)"
+
+        del message[0] # "s!quote"
+        del message[0] # "add"
+        quote = " ".join(message)
+
+        num = len(quotes)
+        date = datetime.now()
+        quotes[num] = '"' + quote + '" [' + date.strftime('%Y-%m-%d') + ']'
+
+        with open('quotes.json', 'w') as quotes_file:
+            json.dump(quotes, quotes_file)
+        return "{0} - Quote #{1} saved!".format(viewer, num)
+
+    return None

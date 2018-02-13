@@ -71,7 +71,8 @@ def award_viewer(viewer, amount, queue):
 def award_all_viewers(amount, queue):
     """Fetch the viewer list (save the mods) and award everyone with given amount of currency."""
     global mods
-    mods = []
+    if mods == None:
+        mods = []
     config = get_config()
     try:
         channel = config['irc']['channel'].replace('#', '')
