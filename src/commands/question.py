@@ -4,8 +4,6 @@ import sys
 from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer, ChatterBotCorpusTrainer
 
-#from src.currency.currency import get_mods
-
 chatbot = None
 
 def question(args):
@@ -38,43 +36,43 @@ def question(args):
         if viewer != "shakajiub":
             return None
 
-        if "q" not in message or "a" not in message:
-            return "@{0} - Invalid training input.".format(viewer)
+        if "<" not in message or ">" not in message:
+            init_bot(False)
+            chatbot.set_trainer(ChatterBotCorpusTrainer)
+            chatbot.train("training.conversations")
+            #chatbot.train("training.emotions")
+            chatbot.train("training.greetings")
+            chatbot.train("training.jokes")
+            chatbot.train("training.robojiub")
+            chatbot.train("training.suntzu")
+            init_bot(True)
+            return "@{0} - Training complete!".format(viewer)
 
-        msg = " ".join(message).split(" q ")[1]
-        question = msg.split(" a ")[0]
-        answer = msg.split(" a ")[1]
+        msg = " ".join(message).split(" < ")[1]
+        question = msg.split(" > ")[0]
+        answer = msg.split(" > ")[1]
 
         init_bot(False)
         chatbot.set_trainer(ListTrainer)
-
-        chatbot.train([
-            question,
-            answer
-        ])
+        chatbot.train([question, answer])
         init_bot(True)
-        chatbot.set_trainer(ChatterBotCorpusTrainer)
-
-#        chatbot.train("training.robojiub")
-#        chatbot.train("training.humor")
-#        chatbot.train("chatterbot.corpus.english.ai")
-#        chatbot.train("chatterbot.corpus.english.computers")
-#        chatbot.train("chatterbot.corpus.english.conversations")
-#        chatbot.train("chatterbot.corpus.english.emotion")
-#        chatbot.train("chatterbot.corpus.english.greetings")
 
         return "@{0} - I can now associate \"{1}\" with \"{2}\", thank you. :)".format(viewer, question, answer)
 
     if chatbot == None:
         init_bot(True)
 
+    print "< " + " ".join(message)
+
     response = "Sorry, I have not been trained yet..."
     try:
-        response = chatbot.get_response(" ".join(message).capitalize(), 42)
+        response = chatbot.get_response(" ".join(message))
     except Exception:
         queue.put(("{0}".format(sys.exc_info()[0]), 'BG_error'))
         queue.put(("question() - Could not get response", 'BG_error'))
         response = "You broke me."
+
+    print "> " + response.text
 
     return "@{0} - {1}".format(viewer, response.text)
 
