@@ -156,14 +156,13 @@ class RoboJiub:
 
         # CLEARCHAT is sent when a user has been timed out or banned
         if msg_data['type'] == "CLEARCHAT":
-            print msg_data
             if "@ban-duration" in msg_data:
                 queue.put(("{0} has been timed out for {1} seconds. Reason: {2}".format(
                     msg_data['message'], msg_data['@ban-duration'], msg_data['ban-reason']), 'FG_notice'
                 ))
             else:
                 queue.put(("{0} has been banned. Reason: {1}".format(
-                    msg_data['message'], msg_data['ban-reason']), 'FG_notice'
+                    msg_data['message'], msg_data['@ban-reason']), 'FG_notice'
                 ))
             return None
 
