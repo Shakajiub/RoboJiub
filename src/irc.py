@@ -29,6 +29,7 @@ class IRC:
             queue.put(("check_for_message() - Can't decode chat message!", 'BG_error'))
             return False
 
+        # TODO - Parse USERSTATE and ROOMSTATE
         if len(data) > 1 and len(data) < 4 and len(data[1].split(' ')) > 1:
             msg_type = data[1].split(' ')[1]
             msg_data = { 'type': msg_type }
