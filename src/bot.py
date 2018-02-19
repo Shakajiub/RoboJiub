@@ -39,7 +39,7 @@ class RoboJiub:
             thread_main.start()
         else:
             self.connected = False
-            self.queue.put(("Disconnecting from the channel", 'BG_progress'))
+            self.queue.put(("Disconnecting from the channel ...", 'BG_progress'))
             self.irc.end_connection()
         self.gui.toggle_bot_button(self.connected) # Forward connection status to the gui
 
@@ -58,7 +58,7 @@ class RoboJiub:
                         'message': new_cron['message']
                     }
         except KeyError:
-            self.queue.put(("load_crons() - Cron config is corrupted", 'BG_error'))
+            self.queue.put(("load_crons() - Cron config is corrupted!", 'BG_error'))
             self.crons = {}
 
     def update_crons(self):
@@ -82,12 +82,12 @@ class RoboJiub:
         try:
             if config['currency']['enabled'] and current_time - self.currency_timer > config['currency']['timer']:
                 if config['currency']['log']:
-                    self.queue.put(("Awarding currency to current viewers", 'BG_progress'))
+                    self.queue.put(("Awarding currency to current viewers ...", 'BG_progress'))
                 self.currency_timer = current_time
                 thread = threading.Thread(target=award_all_viewers, args=(config['currency']['amount'], self.queue))
                 thread.start()
         except KeyError:
-            self.queue.put(("update_currency() - Currency config is corrupted", 'BG_error'))
+            self.queue.put(("update_currency() - Currency config is corrupted!", 'BG_error'))
 
     def after_loop(self):
         """Handle events outside of tkinter (puts itself after root loop 10 times per second)."""
@@ -112,7 +112,7 @@ class RoboJiub:
         while self.connected:
             data = sock.recv(1024)
             if len(data) == 0:
-                queue.put(("Connection was lost, reconnecting", 'BG_progress'))
+                queue.put(("Connection was lost, reconnecting ...", 'BG_progress'))
                 sock = self.irc.get_socket_object()
 
             irc.check_for_ping(data)
@@ -144,12 +144,12 @@ class RoboJiub:
             return False
 
         botname = get_botname()
-        username = msg_data['display-name'].lower().encode('utf-8')
+        username = msg_data['display-name'].encode('utf-8').lower()
         if username == botname:
             return False
 
-        message = msg_data['message'].encode('utf-8')[:-1]
-        queue.put(("[{0}]: {1}".format(username, message), 'BG_chat'))
+        message = msg_data['message'].encode('utf-8')
+        queue.put((message, 'BG_chat', username, msg_data['color'], msg_data['mod'], msg_data['subscriber']))
         self.cron_value = 1
 
         if not message.startswith("s!"):
@@ -170,7 +170,7 @@ class RoboJiub:
             if get_config()['commands'][command_name]['enabled']:
                 return True
             else:
-                queue.put(("Command '{0}' is disabled, ignoring request".format(command_name), 'BG_progress'))
+                queue.put(("Command '{0}' is disabled, ignoring request ...".format(command_name), 'BG_progress'))
                 return False
         except KeyError:
             return False
@@ -191,7 +191,7 @@ class RoboJiub:
             module = importlib.import_module('src.commands.{0}'.format(command_name))
             return module
         except ImportError:
-            queue.put(("get_command_module() - Could not import module '{0}'".format(command_name), 'BG_error'))
+            queue.put(("get_command_module() - Could not import module '{0}'!".format(command_name), 'BG_error'))
         return None
 
     def get_command_result(self, module, command_name, args):
@@ -203,7 +203,7 @@ class RoboJiub:
             if result == None: # Commands return None if there was an error in the code
                 return None
             queue.put(("[{0}]: {1}".format(config['irc']['username'], result.encode('utf-8')), 'BG_chat'))
-            return result#.decode('utf-8')
+            return result
         except AttributeError:
-            queue.put(("get_command_result() - No function found in module '{0}'".format(command_name), 'BG_error'))
+            queue.put(("get_command_result() - No function found in module '{0}'!".format(command_name), 'BG_error'))
         return None

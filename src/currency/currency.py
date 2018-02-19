@@ -38,11 +38,11 @@ def create_viewer(viewer, queue, bonus=0):
             try:
                 data = { 'currency': get_config()['currency']['startwith'] + bonus }
             except KeyError:
-                queue.put(("create_viewer() - Currency config is corrupted", 'BG_error'))
+                queue.put(("create_viewer() - Currency config is corrupted!", 'BG_error'))
                 data = { 'currency': bonus }
             json.dump(data, f)
     except IOError:
-        queue.put(("create_viewer() - Could not create json file for '{0}'".format(viewer), 'BG_error'))
+        queue.put(("create_viewer() - Could not create json file for '{0}'!".format(viewer), 'BG_error'))
 
 def delete_viewer(viewer):
     """Delete the json file of given viewer if it exists."""
@@ -62,11 +62,11 @@ def award_viewer(viewer, amount, queue):
                 json.dump(data, f)
                 f.truncate()
             except KeyError:
-                queue.put(("award_viewer() - Corrupted json file for '{0}'".format(viewer), 'BG_error'))
+                queue.put(("award_viewer() - Corrupted json file for '{0}'!".format(viewer), 'BG_error'))
                 delete_viewer(viewer)
                 create_viewer(viewer, queue, amount)
     except IOError:
-        queue.put(("award_viewer() - Could not open json file for '{0}'".format(viewer), 'BG_error'))
+        queue.put(("award_viewer() - Could not open json file for '{0}'!".format(viewer), 'BG_error'))
 
 def award_all_viewers(amount, queue):
     """Fetch the viewer list (save the mods) and award everyone with given amount of currency."""
@@ -85,9 +85,9 @@ def award_all_viewers(amount, queue):
                 if category == "moderators":
                     mods.append(viewer)
     except KeyError:
-        queue.put(("award_all_viewers() - IRC config is corrupted", 'BG_error'))
+        queue.put(("award_all_viewers() - IRC config is corrupted!", 'BG_error'))
     except URLError:
-        queue.put(("award_all_viewers() - Could not get user list", 'BG_error'))
+        queue.put(("award_all_viewers() - Could not get user list!", 'BG_error'))
 
 def get_viewer_value(viewer, queue, key):
     """Get the value of given key in the json file of given viewer."""
@@ -101,9 +101,9 @@ def get_viewer_value(viewer, queue, key):
                 value = data.get(key)
                 return value
             except KeyError:
-                queue.put(("get_viewer_value() - Invalid key '{0}'".format(key), 'BG_error'))
+                queue.put(("get_viewer_value() - Invalid key '{0}'!".format(key), 'BG_error'))
     except IOError:
-        queue.put(("get_viewer_value() - Could not open json file for '{0}'".format(viewer), 'BG_error'))
+        queue.put(("get_viewer_value() - Could not open json file for '{0}'!".format(viewer), 'BG_error'))
 
 def get_currency(queue):
     """Return the name of the currency if it's enabled."""
@@ -113,5 +113,5 @@ def get_currency(queue):
             return None
         return config['currency']['name']
     except KeyError:
-        queue.put(("validate_currency() - Currency config is corrupted", 'BG_error'))
+        queue.put(("validate_currency() - Currency config is corrupted!", 'BG_error'))
     return None

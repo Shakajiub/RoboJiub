@@ -29,6 +29,8 @@ class RoboGUI:
         self.log.tag_configure('BG_error', background='#460000')
         self.log.tag_configure('BG_success', background='#004600')
         self.log.tag_configure('BG_progress', background='#464600')
+        self.log.tag_configure('FG_mod', foreground='#00d2d2')
+        self.log.tag_configure('FG_sub', foreground='#d200d2')
         self.log.pack(anchor=tk.W, padx=10, pady=10)
 
         # Button to quit the application
@@ -67,8 +69,6 @@ class RoboGUI:
             msg_text = "ERROR: " + msg_text
             print(msg_text)
 
-        elif msg_color == 'BG_progress':
-            msg_text = msg_text
         return msg_text, msg_color
 
     def handle_queue(self):
@@ -79,7 +79,25 @@ class RoboGUI:
                 msg_text, msg_color = self.prepare_queue_message(msg[0], msg[1])
                 msg_time = strftime("%X ", localtime())
                 self.log.configure(state='normal')
-                self.log.insert(tk.END, msg_time + msg_text + '\n', msg_color)
+
+                if len(msg) == 6: # Chat messages have a bunch of user information:
+                    # msg[0] == The message itself
+                    # msg[1] == Background color tag (generally 'BG_chat')
+                    # msg[2] == Username of the message's poster
+                    # msg[3] == Custom color for the username
+                    # msg[4] == '1' if the user is a moderator, otherwise '0'
+                    # msg[5] == '1' if the user is a subscriber, otherwise '0'
+
+                    self.log.tag_configure(msg[2], foreground=msg[3])
+                    self.log.insert(tk.END, msg_time, msg_color)
+                    self.log.insert(tk.END, "[{0}]".format(msg[2]), (msg_color, msg[2]))
+                    if msg[4] == '1': self.log.insert(tk.END, "[M]", (msg_color, 'FG_mod'))
+                    if msg[5] == '1': self.log.insert(tk.END, "[S]", (msg_color, 'FG_sub'))
+                    self.log.insert(tk.END, ": " + msg_text + '\n', msg_color)
+
+                else: # Other messages to print are simpler (generally debug & error messages):
+                    self.log.insert(tk.END, msg_time + msg_text + '\n', msg_color)
+
                 self.log.see(tk.END)
                 self.log.configure(state='disabled')
             except Queue.Empty: pass

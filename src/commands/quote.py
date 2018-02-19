@@ -19,7 +19,7 @@ def quote(args):
             quotes = json.load(quotes_file)
     except Exception:
         queue.put(("{0}".format(sys.exc_info()[0]), 'BG_error'))
-        queue.put(("quotes() - Could not load json", 'BG_error'))
+        queue.put(("quotes() - Could not load json!", 'BG_error'))
         return None
 
     response = "Sorry, I could not find that quote."

@@ -15,7 +15,7 @@ def commands(args):
     except Exception:
         queue = args[0]
         queue.put(("{0}".format(sys.exc_info()[0]), 'BG_error'))
-        queue.put(("commands() - Could not load json", 'BG_error'))
+        queue.put(("commands() - Could not load json!", 'BG_error'))
         return None
 
     for cmd in config['commands']:

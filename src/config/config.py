@@ -17,7 +17,7 @@ def get_botname():
     try:
         botname = get_config()['irc']['username']
     except KeyError:
-        self.queue.put(("config.get_botname() - IRC config is corrupted", 'BG_error'))
+        self.queue.put(("config.get_botname() - IRC config is corrupted!", 'BG_error'))
     return botname
 
 def get_channel():
@@ -26,5 +26,5 @@ def get_channel():
     try:
         channel = get_config()['irc']['channel']
     except KeyError:
-        self.queue.put(("config.get_channel() - IRC config is corrupted", 'BG_error'))
+        self.queue.put(("config.get_channel() - IRC config is corrupted!", 'BG_error'))
     return channel

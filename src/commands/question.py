@@ -40,7 +40,7 @@ def question(args):
             init_bot(False)
             chatbot.set_trainer(ChatterBotCorpusTrainer)
             chatbot.train("training.conversations")
-            #chatbot.train("training.emotions")
+            chatbot.train("training.emotions")
             chatbot.train("training.greetings")
             chatbot.train("training.jokes")
             chatbot.train("training.robojiub")
@@ -63,17 +63,14 @@ def question(args):
         init_bot(True)
 
     print "< " + " ".join(message)
-
     response = "Sorry, I have not been trained yet..."
     try:
         response = chatbot.get_response(" ".join(message))
     except Exception:
         queue.put(("{0}".format(sys.exc_info()[0]), 'BG_error'))
-        queue.put(("question() - Could not get response", 'BG_error'))
+        queue.put(("question() - Could not get response!", 'BG_error'))
         response = "You broke me."
-
     print "> " + response.text
-
     return "@{0} - {1}".format(viewer, response.text)
 
 def init_bot(readonly):
