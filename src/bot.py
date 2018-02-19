@@ -155,6 +155,16 @@ class RoboJiub:
                     msg_data['msg-param-sub-plan'], # Type of subscription plan being used (Prime, 1000, 2000, 3000)
                     msg_data['msg-param-sub-plan-name'] # Display name of the subscription plan
                 ])
+            elif msg_data['msg-id'] == "raid":
+                try:
+                    config = get_config()
+                    if int(msg_data['msg-param-viewerCount']) >= config['messages']['raid']['limit']:
+                        irc.send_custom_message("raid", [
+                            msg_data['msg-param-displayName'], # Display name of the source user raiding this channel
+                            msg_data['msg-param-viewerCount'] # Number of viewers watching the source channel raiding this channel
+                        ])
+                except KeyError:
+                    queue.put(("parse_socket_data() - Message config is corrupted!", 'BG_error'))
             return False
 
         message = msg_data['message'].encode('utf-8')
@@ -164,8 +174,8 @@ class RoboJiub:
         if "bits" in msg_data:
             try:
                 config = get_config()
-                if int(msg_data['bits']) >= config['messages']['bits']['limit']:
-                    irc.send_custom_message("bits", ['@' + username, msg_data['bits']])
+                if int(msg_data['bits']) >= config['messages']['cheer']['limit']:
+                    irc.send_custom_message("cheer", ['@' + username, msg_data['bits']])
             except KeyError:
                 queue.put(("parse_socket_data() - Message config is corrupted!", 'BG_error'))
             return False

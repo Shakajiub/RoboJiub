@@ -9,11 +9,12 @@
     "messages": {
         "greeting": { "enabled": true, "msg": "RoboJiub activated VoHiYo" },
         "goodbye":  { "enabled": true, "msg": "RoboJiub deactivated VoHiYo" },
-        "bits":     { "enabled": true,  "msg": "Thank you for the cheer, {user} !!! VoHiYo (bits: {bits})", "limit": 100 },
-        "sub":      { "enabled": true,  "msg": "Thank you for subscribing, {user} !!! VoHiYo (streak: {streak}, tier: {tier}, plan: {plan})" }
+        "cheer":    { "enabled": true, "msg": "Thank you for the cheer, {user} !!! VoHiYo (bits: {bits})", "limit": 100 },
+        "sub":      { "enabled": true, "msg": "Thank you for subscribing, {user} !!! VoHiYo (streak: {streak}, tier: {tier}, plan: {plan})" },
+        "raid":     { "enabled": true, "msg": "We are being raided by {user}! !!! PogChamp (raiders: {raiders})", "limit": 2 }
     },
     "currency": {
-        "enabled": false,
+        "enabled": true,
         "name": "point",
         "timer": 60,
         "amount": 1,

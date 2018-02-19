@@ -29,8 +29,12 @@ class IRC:
             queue.put(("check_for_message() - Can't decode chat message!", 'BG_error'))
             return False
 
-        # TODO - Parse USERSTATE and ROOMSTATE
-        if len(data) > 1 and len(data) < 4 and len(data[1].split(' ')) > 1:
+        if len(data) > 3:
+            print("TODO - Parse USERSTATE and ROOMSTATE")
+            return False
+
+        # This will catch both PRIVMSG and USERNOTICE
+        if len(data) > 1 and len(data[1].split(' ')) > 1:
             msg_type = data[1].split(' ')[1]
             msg_data = { 'type': msg_type }
 
@@ -84,10 +88,12 @@ class IRC:
 
     def format_custom_message(self, message, text, data):
         """Add relevant data to custom bot messages."""
-        if message == "bits" and len(data) == 2:
+        if message == "cheer" and len(data) == 2:
             text = text.format(user=data[0], bits=data[1])
         elif message == "sub" and len(data) == 4:
             text = text.format(user=data[0], streak=data[1], tier=data[2], plan=data[3])
+        elif message == "raid" and len(data) == 2:
+            text = text.format(user=data[0], raiders=data[1])
         return text
 
     def get_socket_object(self):
