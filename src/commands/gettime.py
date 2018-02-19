@@ -16,4 +16,4 @@ def gettime(args):
     except UnknownTimeZoneError:
         return "@{0} - I don't recognize that timezone :(".format(viewer)
 
-    return time.strftime('%Y-%m-%d - %H:%M:%S')
+    return "@{0} - The current date/time in {1} is {2}.".format(viewer, tz, time.strftime('%Y-%m-%d - %H:%M:%S'))

@@ -102,7 +102,7 @@ class RoboJiub:
         self.root.after(100, self.after_loop)
 
     def robo_main(self):
-        """Handle messages received via irc socket (main function of the bot, basically)."""
+        """Handle messages received via irc socket (main loop of the bot, basically)."""
         config = get_config()
 
         irc = self.irc
@@ -116,51 +116,53 @@ class RoboJiub:
                 sock = self.irc.get_socket_object()
 
             irc.check_for_ping(data)
-            #irc.check_for_notice(data)
 
-            command = self.check_for_command(irc, data, queue)
-            if not command:
+            parsed_data = self.check_for_command(irc, data, queue)
+            if not parsed_data:
                 continue
 
-            username, message = command[0], command[1]
-            command_name = message[2:-1].split(' ')[0]
+            username = parsed_data[0]
+            message = parsed_data[1]
+            command = parsed_data[2]
 
-            if command_name in ["celsius", "fahrenheit", "kelvin"]:
-                message = "s!temperature {0}".format(message[2:].lower())
-                command_name = "temperature"
-
-            if not self.check_command_enabled(command_name, queue):
+            if not self.check_command_enabled(command, queue):
                 message = "s!custom {0}".format(message[2:])
-                command_name = "custom"
+                command = "custom"
 
-            if self.check_mod_only(command_name, username):
+            if self.check_mod_only(command, username):
                 continue
 
-            args = (queue, username, message[:-1].split(' '))
-            module = self.get_command_module(command_name, queue)
-            result = self.get_command_result(module, command_name, args)
+            args = (queue, username, message.split(' '))
+            module = self.get_command_module(command, queue)
+            result = self.get_command_result(module, command, args)
             irc.send_message(result)
 
     def check_for_command(self, irc, data, queue):
         """If given data contains a command, return the username & the command, otherwise false."""
-        if not irc.check_for_message(data):
+        msg_data = irc.check_for_message(data)
+        if not msg_data:
             return False
 
         botname = get_botname()
-        message_dict = irc.get_message(data)
-        username = message_dict['username'].encode('utf-8')
+        username = msg_data['display-name'].lower().encode('utf-8')
         if username == botname:
             return False
 
-        message = message_dict['message'].encode('utf-8')
-        queue.put(("[{0}]: {1}".format(username, message)[:-1], 'BG_chat'))
+        message = msg_data['message'].encode('utf-8')[:-1]
+        queue.put(("[{0}]: {1}".format(username, message), 'BG_chat'))
         self.cron_value = 1
 
         if not message.startswith("s!"):
             if message.startswith("@{0}".format(botname)): # Replace @bot with s!question
                 message = "s!question {0}".format(message)
             else: return False
-        return (username, message)
+
+        command = message[2:].split(' ')[0]
+        if command in ["celsius", "fahrenheit", "kelvin"]:
+            message = "s!temperature {0}".format(message[2:].lower())
+            command = "temperature"
+
+        return (username, message, command)
 
     def check_command_enabled(self, command_name, queue):
         """Check if the given command is enabled."""

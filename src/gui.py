@@ -64,11 +64,11 @@ class RoboGUI:
             else: self.bg_color = 'BG_dark'
 
         elif msg_color == 'BG_error':
-            msg_text = "ERROR: " + msg_text + "!"
+            msg_text = "ERROR: " + msg_text
             print(msg_text)
 
         elif msg_color == 'BG_progress':
-            msg_text = msg_text + " ..."
+            msg_text = msg_text
         return msg_text, msg_color
 
     def handle_queue(self):

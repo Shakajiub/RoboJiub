@@ -21,19 +21,21 @@ class IRC:
             self.queue.put(("irc.end_connection() - Could not close socket", 'BG_error'))
 
     def check_for_message(self, data):
-        """Return true if given data contains a message from a viewer."""
-        s = '[a-zA-Z0-9_]'
-        if re.match(r'^:{0}+\!{0}+@{0}+(\.tmi\.twitch\.tv) PRIVMSG #{0}+ :.+$'.format(s), data):
-            return True
-        return False
+        """Parse data from twitch into a nice dictionary."""
+        data = data.encode('utf8').split(" :")
 
-#    def check_for_notice(self, data):
-#        """Return true if given data contains a sub/resub/raid notice."""
-#        s = '[a-zA-Z0-9_]'
-#        if re.match(r'^:{0}+\!{0}+@{0}+(\.tmi\.twitch\.tv) USERNOTICE #{0}+ :.+$'.format(s), data):
-#            print(data.encode('utf8'))
-#            return True
-#        return False
+        if len(data) >= 3:
+            if data[1].split(' ')[1] == "PRIVMSG":
+                msg_data = { 'type': 'PRIVMSG' }
+                params = data[0].split(';')
+                for param in params:
+                    p = param.split('=')
+                    msg_data[p[0]] = p[1]
+                msg_data['message'] = data[2][:-1]
+                #print msg_data
+                return msg_data
+
+        return False
 
     def check_for_ping(self, data):
         """If given data contains PING, send PONG + rest of the data through the irc socket."""
@@ -71,20 +73,6 @@ class IRC:
         except KeyError:
             self.queue.put(("irc.send_custom_message() - Could not send message '{0}'".format(message), 'BG_error'))
 
-    def get_message(self, data):
-        """Return a dictionary containing the 'username' and the 'message' from given data."""
-        return {
-            'username': re.findall(r'^:([a-zA-Z0-9_]+)\!', data)[0],
-            'message': re.findall(r'PRIVMSG #[a-zA-Z0-9_]+ :(.+)', data)[0].decode('utf8')
-        }
-
-#    def get_notice(self, data):
-#        """Return a dictionary containing the 'username' and type of notice."""
-#        return {
-#            'username': re.findall(r'^:([a-zA-Z0-9_]+)\!', data)[0],
-#            'notice': None
-#        }
-
     def get_socket_object(self):
         """Connect and join irc channels as setup in the config. Return None or the socket."""
         config = get_config()
@@ -100,8 +88,8 @@ class IRC:
         if not channel:
             return None
 
-#        self.sock.send('CAP REQ :twitch.tv/tags\r\n'.encode('utf-8'))
-#        self.sock.send('CAP REQ :twitch.tv/commands\r\n'.encode('utf-8'))
+        self.sock.send('CAP REQ :twitch.tv/tags\r\n'.encode('utf-8'))
+        self.sock.send('CAP REQ :twitch.tv/commands\r\n'.encode('utf-8'))
 
         self.sock.send('JOIN {0}\r\n'.format(channel))
         self.send_custom_message('greeting')

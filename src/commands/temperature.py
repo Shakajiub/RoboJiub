@@ -8,6 +8,8 @@ def temperature(args):
     viewer = args[1]
     message = args[2]
 
+    print message
+
     if message[2][0] == '-':
         if not message[2][1:].isdigit():
             return "@{0} - Invalid temperature.".format(viewer)

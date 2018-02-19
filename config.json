@@ -8,8 +8,8 @@
     },
     "messages": {
         "enabled": false,
-        "greeting": "RoboJiub activated",
-        "goodbye": "RoboJiub deactivated"
+        "greeting": "RoboJiub activated VoHiYo",
+        "goodbye": "RoboJiub deactivated VoHiYo"
     },
     "currency": {
         "enabled": true,
@@ -65,7 +65,7 @@
         },
         "quote": {
             "enabled": true,
-            "mod_only": true
+            "mod_only": false
         },
         "ddg": {
             "enabled": true,
