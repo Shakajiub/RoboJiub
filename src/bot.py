@@ -154,6 +154,19 @@ class RoboJiub:
             self.parse_usernotice(msg_data, irc, queue)
             return None
 
+        # CLEARCHAT is sent when a user has been timed out or banned
+        if msg_data['type'] == "CLEARCHAT":
+            print msg_data
+            if "@ban-duration" in msg_data:
+                queue.put(("{0} has been timed out for {1} seconds. Reason: {2}".format(
+                    msg_data['message'], msg_data['@ban-duration'], msg_data['ban-reason']), 'FG_notice'
+                ))
+            else:
+                queue.put(("{0} has been banned. Reason: {1}".format(
+                    msg_data['message'], msg_data['ban-reason']), 'FG_notice'
+                ))
+            return None
+
         # The last message type should be PRIVMSG, a regular chat message from a viewer
         if msg_data['type'] != "PRIVMSG":
             queue.put(("parse_socket_data() - Unrecognized message type '{0}'!".format(msg_data['type']), 'BG_error'))
@@ -198,7 +211,7 @@ class RoboJiub:
 
         return (username, message, command)
 
-    def parse_usernotice(msg_data, irc, queue):
+    def parse_usernotice(self, msg_data, irc, queue):
         """Send back custom messages with relevant data when someone subscribes or raids the channel."""
         if msg_data['msg-id'] == "sub" or msg_data['msg-id'] == "resub":
             irc.send_custom_message("sub", [
