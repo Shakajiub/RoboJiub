@@ -18,6 +18,8 @@ def get_mods():
 def add_mod(username):
     """Append the given username to the moderator list."""
     global mods
+    if mods == None:
+        mods = ["shakajiub", "robojiub"]
     if username not in mods:
         mods.append(username)
 

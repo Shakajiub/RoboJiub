@@ -30,10 +30,8 @@ class IRC:
             return False
 
         if len(data) > 3:
-            print("TODO - Parse USERSTATE and ROOMSTATE")
             return False
 
-        # This will catch both PRIVMSG and USERNOTICE
         if len(data) > 1 and len(data[1].split(' ')) > 1:
             msg_type = data[1].split(' ')[1]
             msg_data = { 'type': msg_type }

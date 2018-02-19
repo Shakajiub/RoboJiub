@@ -72,7 +72,7 @@ class RoboJiub:
             if current_time - loop_cron['timer'] > loop_cron['timer_max']:
                 loop_cron['timer'] = current_time
                 if self.botname == None:
-                    self.botname = get_botname().encode('utf-8')
+                    self.botname = get_botname().encode('utf-8').lower()
                 self.cron_value = 0
                 self.queue.put(("[{0}]: {1}".format(self.botname, loop_cron['message']), 'BG_chat'))
                 self.irc.send_message(loop_cron['message'])
@@ -119,7 +119,7 @@ class RoboJiub:
 
             irc.check_for_ping(data)
             parsed_data = self.parse_socket_data(irc, data, queue)
-            if not parsed_data: continue
+            if parsed_data == None: continue
 
             username = parsed_data[0]
             message = parsed_data[1]
@@ -135,42 +135,42 @@ class RoboJiub:
             irc.send_message(result)
 
     def parse_socket_data(self, irc, data, queue):
-        """If given chat message contains a command, return the username & the command, otherwise false."""
+        """Parse any received data from the socket and determine what to do with it."""
         msg_data = irc.check_for_message(data, queue)
         if not msg_data:
-            return False
+            return None
 
+        # Notices are short messages that are sent when slowmode or follower/sub-only chat is toggled
+        if msg_data['type'] == "NOTICE":
+            queue.put((msg_data['message'].encode('utf-8'), 'FG_notice'))
+            return None
+
+        # User & room information received when joining a channel)
+        if msg_data['type'] == "USERSTATE" or msg_data['type'] == "ROOMSTATE":
+            return None
+
+        # Usernotices are received when someone subscribes or raids the channel
+        if msg_data['type'] == "USERNOTICE":
+            self.parse_usernotice(msg_data, irc, queue)
+            return None
+
+        # The last message type should be PRIVMSG, a regular chat message from a viewer
+        if msg_data['type'] != "PRIVMSG":
+            queue.put(("parse_socket_data() - Unrecognized message type '{0}'!".format(msg_data['type']), 'BG_error'))
+            return None
+
+        # Make sure the bot does not ever reply to itself
         if self.botname == None:
-            self.botname = get_botname().encode('utf-8')
-
+            self.botname = get_botname().encode('utf-8').lower()
         username = msg_data['display-name'].encode('utf-8').lower()
         if username == self.botname:
-            return False
-
-        if msg_data['type'] == "USERNOTICE":
-            if msg_data['msg-id'] == "sub" or msg_data['msg-id'] == "resub":
-                irc.send_custom_message("sub", [
-                    '@' + username,
-                    msg_data['msg-param-months'], # Number of consecutive months the user has subscribed for
-                    msg_data['msg-param-sub-plan'], # Type of subscription plan being used (Prime, 1000, 2000, 3000)
-                    msg_data['msg-param-sub-plan-name'] # Display name of the subscription plan
-                ])
-            elif msg_data['msg-id'] == "raid":
-                try:
-                    config = get_config()
-                    if int(msg_data['msg-param-viewerCount']) >= config['messages']['raid']['limit']:
-                        irc.send_custom_message("raid", [
-                            msg_data['msg-param-displayName'], # Display name of the source user raiding this channel
-                            msg_data['msg-param-viewerCount'] # Number of viewers watching the source channel raiding this channel
-                        ])
-                except KeyError:
-                    queue.put(("parse_socket_data() - Message config is corrupted!", 'BG_error'))
-            return False
+            return None
 
         message = msg_data['message'].encode('utf-8')
         queue.put((message, 'BG_chat', username, msg_data['color'], msg_data['mod'], msg_data['subscriber']))
         self.cron_value = 1 # Tell our cron manager that the chat has user activity
 
+        # If the data contains a "bits" key, the chat message is a cheer
         if "bits" in msg_data:
             try:
                 config = get_config()
@@ -178,24 +178,45 @@ class RoboJiub:
                     irc.send_custom_message("cheer", ['@' + username, msg_data['bits']])
             except KeyError:
                 queue.put(("parse_socket_data() - Message config is corrupted!", 'BG_error'))
-            return False
+            return None
 
+        # And finally, if the message starts with our command prefix,
         if not message.startswith("s!"):
             if message.startswith("@{0}".format(self.botname)): # Replace @bot with s!question
                 message = "s!question {0}".format(message)
-            else: return False
+            else: return None
 
         command = message[2:].split(' ')[0]
         if command in ["celsius", "fahrenheit", "kelvin"]:
             message = "s!temperature {0}".format(message[2:].lower())
             command = "temperature"
 
-        if msg_data['mod'] == '1':
+        if msg_data['mod'] == '1' or "broadcaster" in msg_data['@badges']:
             add_mod(username)
         elif self.check_mod_only(command):
-            return False
+            return None
 
         return (username, message, command)
+
+    def parse_usernotice(msg_data, irc, queue):
+        """Send back custom messages with relevant data when someone subscribes or raids the channel."""
+        if msg_data['msg-id'] == "sub" or msg_data['msg-id'] == "resub":
+            irc.send_custom_message("sub", [
+                '@' + msg_data['display-name'].encode('utf-8').lower(), # Subscriber's display name
+                msg_data['msg-param-months'], # Number of consecutive months the user has subscribed for
+                msg_data['msg-param-sub-plan'], # Type of subscription plan (Prime, 1000, 2000, 3000)
+                msg_data['msg-param-sub-plan-name'] # Display name of the subscription plan
+            ])
+        elif msg_data['msg-id'] == "raid":
+            try:
+                config = get_config()
+                if int(msg_data['msg-param-viewerCount']) >= config['messages']['raid']['limit']:
+                    irc.send_custom_message("raid", [
+                        msg_data['msg-param-displayName'], # Display name of the user raiding this channel
+                        msg_data['msg-param-viewerCount'] # Number of viewers raiding this channel
+                    ])
+            except KeyError:
+                queue.put(("parse_socket_data() - Message config is corrupted!", 'BG_error'))
 
     def check_command_enabled(self, command, queue):
         """Check if the given command is enabled."""

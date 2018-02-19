@@ -20,5 +20,8 @@ def points(args):
     if not currency_name:
         return None # None is returned on internal errors
 
+    if not check_viewer_exists(target):
+        return "@{0} - Cannot find that viewer.".format(viewer)
+
     currency = get_viewer_value(target, queue, 'currency')
     return "{0} {1} {2}{3}!".format(start, '{:,}'.format(currency), currency_name, "s" if currency != 1 else "")

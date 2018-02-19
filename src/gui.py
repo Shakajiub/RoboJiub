@@ -29,6 +29,7 @@ class RoboGUI:
         self.log.tag_configure('BG_error', background='#460000')
         self.log.tag_configure('BG_success', background='#004600')
         self.log.tag_configure('BG_progress', background='#464600')
+        self.log.tag_configure('FG_notice', foreground='#999999')
         self.log.tag_configure('FG_mod', foreground='#00d2d2')
         self.log.tag_configure('FG_sub', foreground='#d200d2')
         self.log.pack(anchor=tk.W, padx=10, pady=10)
