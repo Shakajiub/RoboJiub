@@ -8,7 +8,7 @@ from src.irc import *
 from src.gui import *
 from src.commands import *
 from src.config.config import *
-from src.currency.currency import get_mods, award_all_viewers
+from src.currency.currency import get_mods, add_mod, award_all_viewers
 
 class RoboJiub:
     def __init__(self, root):
@@ -18,6 +18,7 @@ class RoboJiub:
         self.irc = IRC(self.queue)
         self.gui = RoboGUI(root, self.queue, self.irc, self.end_application, self.toggle_bot)
 
+        self.botname = None
         self.running = True
         self.connected = False
         self.cron_value = 1 # Has to be high enough for cron messages
@@ -70,9 +71,10 @@ class RoboJiub:
             loop_cron = self.crons[cron]
             if current_time - loop_cron['timer'] > loop_cron['timer_max']:
                 loop_cron['timer'] = current_time
-                botname = get_botname()
+                if self.botname == None:
+                    self.botname = get_botname().encode('utf-8')
                 self.cron_value = 0
-                self.queue.put(("[{0}]: {1}".format(botname, loop_cron['message']), 'BG_chat'))
+                self.queue.put(("[{0}]: {1}".format(self.botname, loop_cron['message']), 'BG_chat'))
                 self.irc.send_message(loop_cron['message'])
 
     def update_currency(self):
@@ -116,44 +118,60 @@ class RoboJiub:
                 sock = self.irc.get_socket_object()
 
             irc.check_for_ping(data)
-
-            parsed_data = self.check_for_command(irc, data, queue)
-            if not parsed_data:
-                continue
+            parsed_data = self.parse_socket_data(irc, data, queue)
+            if not parsed_data: continue
 
             username = parsed_data[0]
             message = parsed_data[1]
             command = parsed_data[2]
 
-            if not self.check_command_enabled(command, queue):
+            if self.check_command_enabled(command, queue) == False:
                 message = "s!custom {0}".format(message[2:])
                 command = "custom"
-
-            if self.check_mod_only(command, username):
-                continue
 
             args = (queue, username, message.split(' '))
             module = self.get_command_module(command, queue)
             result = self.get_command_result(module, command, args)
             irc.send_message(result)
 
-    def check_for_command(self, irc, data, queue):
-        """If given data contains a command, return the username & the command, otherwise false."""
-        msg_data = irc.check_for_message(data)
+    def parse_socket_data(self, irc, data, queue):
+        """If given chat message contains a command, return the username & the command, otherwise false."""
+        msg_data = irc.check_for_message(data, queue)
         if not msg_data:
             return False
 
-        botname = get_botname()
+        if self.botname == None:
+            self.botname = get_botname().encode('utf-8')
+
         username = msg_data['display-name'].encode('utf-8').lower()
-        if username == botname:
+        if username == self.botname:
+            return False
+
+        if msg_data['type'] == "USERNOTICE":
+            if msg_data['msg-id'] == "sub" or msg_data['msg-id'] == "resub":
+                irc.send_custom_message("sub", [
+                    '@' + username,
+                    msg_data['msg-param-months'], # Number of consecutive months the user has subscribed for
+                    msg_data['msg-param-sub-plan'], # Type of subscription plan being used (Prime, 1000, 2000, 3000)
+                    msg_data['msg-param-sub-plan-name'] # Display name of the subscription plan
+                ])
             return False
 
         message = msg_data['message'].encode('utf-8')
         queue.put((message, 'BG_chat', username, msg_data['color'], msg_data['mod'], msg_data['subscriber']))
-        self.cron_value = 1
+        self.cron_value = 1 # Tell our cron manager that the chat has user activity
+
+        if "bits" in msg_data:
+            try:
+                config = get_config()
+                if int(msg_data['bits']) >= config['messages']['bits']['limit']:
+                    irc.send_custom_message("bits", ['@' + username, msg_data['bits']])
+            except KeyError:
+                queue.put(("parse_socket_data() - Message config is corrupted!", 'BG_error'))
+            return False
 
         if not message.startswith("s!"):
-            if message.startswith("@{0}".format(botname)): # Replace @bot with s!question
+            if message.startswith("@{0}".format(self.botname)): # Replace @bot with s!question
                 message = "s!question {0}".format(message)
             else: return False
 
@@ -162,48 +180,50 @@ class RoboJiub:
             message = "s!temperature {0}".format(message[2:].lower())
             command = "temperature"
 
+        if msg_data['mod'] == '1':
+            add_mod(username)
+        elif self.check_mod_only(command):
+            return False
+
         return (username, message, command)
 
-    def check_command_enabled(self, command_name, queue):
+    def check_command_enabled(self, command, queue):
         """Check if the given command is enabled."""
         try:
-            if get_config()['commands'][command_name]['enabled']:
+            if get_config()['commands'][command]['enabled']:
                 return True
             else:
-                queue.put(("Command '{0}' is disabled, ignoring request ...".format(command_name), 'BG_progress'))
+                queue.put(("Command '{0}' is disabled, ignoring request ...".format(command), 'BG_progress'))
                 return False
         except KeyError:
             return False
 
-    def check_mod_only(self, command_name, viewer):
-        """Return true if the command is for mods only and the caller is not a mod."""
+    def check_mod_only(self, command):
+        """Return true if the command is for mods only."""
         try:
-            if get_config()['commands'][command_name]['mod_only'] and viewer not in get_mods():
-                return True
-            else:
-                return False
+            return get_config()['commands'][command]['mod_only']
         except KeyError:
             return False
 
-    def get_command_module(self, command_name, queue):
+    def get_command_module(self, command, queue):
         """Return the appropriate module for given command. None if we can't import it."""
         try:
-            module = importlib.import_module('src.commands.{0}'.format(command_name))
+            module = importlib.import_module('src.commands.{0}'.format(command))
             return module
         except ImportError:
-            queue.put(("get_command_module() - Could not import module '{0}'!".format(command_name), 'BG_error'))
+            queue.put(("get_command_module() - Could not import module '{0}'!".format(command), 'BG_error'))
         return None
 
-    def get_command_result(self, module, command_name, args):
+    def get_command_result(self, module, command, args):
         """Return the result (string) from given command in given module."""
         config = get_config()
         queue = args[0]
         try:
-            result = getattr(module, command_name)(args)
+            result = getattr(module, command)(args)
             if result == None: # Commands return None if there was an error in the code
                 return None
             queue.put(("[{0}]: {1}".format(config['irc']['username'], result.encode('utf-8')), 'BG_chat'))
             return result
         except AttributeError:
-            queue.put(("get_command_result() - No function found in module '{0}'!".format(command_name), 'BG_error'))
+            queue.put(("get_command_result() - No function found in module '{0}'!".format(command), 'BG_error'))
         return None

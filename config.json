@@ -7,12 +7,13 @@
         "oauth_password": "oauth:"
     },
     "messages": {
-        "enabled": false,
-        "greeting": "RoboJiub activated VoHiYo",
-        "goodbye": "RoboJiub deactivated VoHiYo"
+        "greeting": { "enabled": true, "msg": "RoboJiub activated VoHiYo" },
+        "goodbye":  { "enabled": true, "msg": "RoboJiub deactivated VoHiYo" },
+        "bits":     { "enabled": true,  "msg": "Thank you for the cheer, {user} !!! VoHiYo (bits: {bits})", "limit": 100 },
+        "sub":      { "enabled": true,  "msg": "Thank you for subscribing, {user} !!! VoHiYo (streak: {streak}, tier: {tier}, plan: {plan})" }
     },
     "currency": {
-        "enabled": true,
+        "enabled": false,
         "name": "point",
         "timer": 60,
         "amount": 1,
@@ -27,53 +28,17 @@
         }
     },
     "commands": {
-        "points": {
-            "enabled": true,
-            "mod_only": false
-        },
-        "gamble": {
-            "enabled": true,
-            "mod_only": false
-        },
-        "donate": {
-            "enabled": true,
-            "mod_only": false
-        },
-        "question": {
-            "enabled": true,
-            "mod_only": false
-        },
-        "roll": {
-            "enabled": true,
-            "mod_only": false
-        },
-        "bonus": {
-            "enabled": true,
-            "mod_only": true
-        },
-        "gettime": {
-            "enabled": true,
-            "mod_only": false
-        },
-        "temperature": {
-            "enabled": true,
-            "mod_only": false
-        },
-        "bet": {
-            "enabled": true,
-            "mod_only": false
-        },
-        "quote": {
-            "enabled": true,
-            "mod_only": false
-        },
-        "ddg": {
-            "enabled": true,
-            "mod_only": true
-        },
-        "commands": {
-            "enabled": true,
-            "mod_only": false
-        }
+        "points":      { "enabled": true,  "mod_only": false },
+        "gamble":      { "enabled": true,  "mod_only": false },
+        "donate":      { "enabled": true,  "mod_only": false },
+        "question":    { "enabled": true,  "mod_only": false },
+        "roll":        { "enabled": true,  "mod_only": false },
+        "bonus":       { "enabled": true,  "mod_only": true  },
+        "gettime":     { "enabled": true,  "mod_only": false },
+        "temperature": { "enabled": true,  "mod_only": false },
+        "bet":         { "enabled": true,  "mod_only": false },
+        "quote":       { "enabled": true,  "mod_only": false },
+        "ddg":         { "enabled": true,  "mod_only": true  },
+        "commands":    { "enabled": true,  "mod_only": false }
     }
 }

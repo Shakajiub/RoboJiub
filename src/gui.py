@@ -106,7 +106,6 @@ class RoboGUI:
         """Post a custom message as the bot (and clear the input text box)."""
         log_msg = self.manual_text_box.get('1.0', tk.END).replace('\n', ' ')
         if len(log_msg.strip(' ')) > 0:
-            botname = get_botname()
-            self.queue.put(("[{0}]: {1}".format(botname, log_msg), 'BG_chat'))
+            self.queue.put(("[{0}]: {1}".format(get_botname(), log_msg), 'BG_chat'))
             self.irc.send_message(log_msg)
         self.manual_text_box.delete('1.0', tk.END)

@@ -9,14 +9,17 @@ global mods
 mods = None
 
 def get_mods():
-    """Get the list of current mods in the chat."""
-
-    # TODO - Fetch the list if it's None (only during the first minute since bot launch)
-
+    """Get the list of current moderators in the chat."""
     global mods
     if mods == None:
         mods = ["shakajiub", "robojiub"]
     return mods
+
+def add_mod(username):
+    """Append the given username to the moderator list."""
+    global mods
+    if username not in mods:
+        mods.append(username)
 
 def check_viewer_exists(viewer):
     """Check if we have a json file for given viewer."""
@@ -70,9 +73,9 @@ def award_viewer(viewer, amount, queue):
 
 def award_all_viewers(amount, queue):
     """Fetch the viewer list (save the mods) and award everyone with given amount of currency."""
-    global mods
-    if mods == None:
-        mods = []
+#    global mods
+#    if mods == None:
+#        mods = []
     config = get_config()
     try:
         channel = config['irc']['channel'].replace('#', '')
@@ -82,8 +85,8 @@ def award_all_viewers(amount, queue):
         for category in parsed_json['chatters']:
             for viewer in parsed_json['chatters'][category]:
                 award_viewer(viewer, amount, queue)
-                if category == "moderators":
-                    mods.append(viewer)
+#                if category == "moderators":
+#                    mods.append(viewer)
     except KeyError:
         queue.put(("award_all_viewers() - IRC config is corrupted!", 'BG_error'))
     except URLError:

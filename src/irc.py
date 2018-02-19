@@ -20,25 +20,33 @@ class IRC:
             self.queue.put(("{0}".format(sys.exc_info()[0]), 'BG_error'))
             self.queue.put(("irc.end_connection() - Could not close socket!", 'BG_error'))
 
-    def check_for_message(self, data):
+    def check_for_message(self, data, queue):
         """Parse data from twitch into a nice dictionary."""
-        data = data.decode('utf-8').split(" :")
+        try:
+            data = data.decode('utf-8').split(" :")
+        except UnicodeDecodeError:
+            # TODO - This generally means the message is spam, so /timeout the user
+            queue.put(("check_for_message() - Can't decode chat message!", 'BG_error'))
+            return False
 
-        if len(data) >= 3:
-            if data[1].split(' ')[1] == "PRIVMSG":
-                msg_data = { 'type': 'PRIVMSG' }
-                params = data[0].split(';')
-                for param in params:
-                    p = param.split('=')
-                    msg_data[p[0]] = p[1]
+        if len(data) > 1 and len(data[1].split(' ')) > 1:
+            msg_type = data[1].split(' ')[1]
+            msg_data = { 'type': msg_type }
+
+            params = data[0].split(';')
+            for param in params:
+                p = param.split('=')
+                msg_data[p[0]] = p[1]
+
+            if len(data) > 2:
                 msg_data['message'] = data[2][:-2]
-                return msg_data
+            return msg_data
 
         else: print(data)
         return False
 
     def check_for_ping(self, data):
-        """If given data contains PING, send PONG + rest of the data through the irc socket."""
+        """If given data starts with PING, send PONG + rest of the data back."""
         if data.startswith('PING'):
             try:
                 self.sock.send('PONG {0}\r\n'.format(data[5:]))
@@ -64,14 +72,22 @@ class IRC:
             self.queue.put(("{0}".format(sys.exc_info()[0]), 'BG_error'))
             self.queue.put(("irc.send_message() - Could not send message!", 'BG_error'))
 
-    def send_custom_message(self, message):
+    def send_custom_message(self, message, data=None):
         """Try to send given message (if defined in the config)."""
         config = get_config()
         try:
-            if config['messages']['enabled']:
-                self.send_message(config['messages'][message])
+            if config['messages'][message]['enabled']:
+                self.send_message(self.format_custom_message(message, config['messages'][message]['msg'], data))
         except KeyError:
             self.queue.put(("irc.send_custom_message() - Could not send message '{0}'!".format(message), 'BG_error'))
+
+    def format_custom_message(self, message, text, data):
+        """Add relevant data to custom bot messages."""
+        if message == "bits" and len(data) == 2:
+            text = text.format(user=data[0], bits=data[1])
+        elif message == "sub" and len(data) == 4:
+            text = text.format(user=data[0], streak=data[1], tier=data[2], plan=data[3])
+        return text
 
     def get_socket_object(self):
         """Connect and join irc channels as setup in the config. Return None or the socket."""
