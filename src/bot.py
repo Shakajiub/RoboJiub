@@ -159,6 +159,7 @@ class RoboJiub:
             reason = ""
             if len(msg_data['ban-reason']) > 0:
                 reason = "Reason: " + " ".join(msg_data['ban-reason'].split('\\s'))
+
             if "ban-duration" in msg_data:
                 queue.put(("@{0} has been timed out for {1} seconds. {2}".format(
                     msg_data['message'], msg_data['ban-duration'], reason), 'FG_notice'
@@ -199,13 +200,16 @@ class RoboJiub:
             else: return None
 
         command = message[2:].split(' ')[0]
+
+        # Here are some (undesired) aliases for the !temperature command
+        # This should not be the place for something like this
         if command in ["celsius", "fahrenheit", "kelvin"]:
             message = "s!temperature {0}".format(message[2:].lower())
             command = "temperature"
 
+        # Since we now receive a user's mod status for every message, we can update the mod list here
         if msg_data['mod'] == '1' or "broadcaster" in msg_data['badges']:
             add_mod(username)
-            print "hey ho"
         elif self.check_mod_only(command):
             return None
 
