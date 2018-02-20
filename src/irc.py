@@ -36,7 +36,7 @@ class IRC:
             msg_type = data[1].split(' ')[1]
             msg_data = { 'type': msg_type }
 
-            params = data[0].split(';')
+            params = data[0][1:].split(';')
             for param in params:
                 p = param.split('=')
                 msg_data[p[0]] = p[1]
@@ -80,7 +80,9 @@ class IRC:
         config = get_config()
         try:
             if config['messages'][message]['enabled']:
-                self.send_message(self.format_custom_message(message, config['messages'][message]['msg'], data))
+                msg = self.format_custom_message(message, config['messages'][message]['msg'], data)
+                self.queue.put(("[{0}]: {1}".format(get_botname(), msg), 'BG_chat'))
+                self.send_message(msg)
         except KeyError:
             self.queue.put(("irc.send_custom_message() - Could not send message '{0}'!".format(message), 'BG_error'))
 

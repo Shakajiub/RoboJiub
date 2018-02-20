@@ -156,14 +156,14 @@ class RoboJiub:
 
         # CLEARCHAT is sent when a user has been timed out or banned
         if msg_data['type'] == "CLEARCHAT":
-            if "@ban-duration" in msg_data:
-                queue.put(("{0} has been timed out for {1} seconds. Reason: {2}".format(
-                    msg_data['message'], msg_data['@ban-duration'], msg_data['ban-reason']), 'FG_notice'
+            reason = ""
+            if len(msg_data['ban-reason']) > 0:
+                reason = "Reason: " + " ".join(msg_data['ban-reason'].split('\\s'))
+            if "ban-duration" in msg_data:
+                queue.put(("@{0} has been timed out for {1} seconds. {2}".format(
+                    msg_data['message'], msg_data['ban-duration'], reason), 'FG_notice'
                 ))
-            else:
-                queue.put(("{0} has been banned. Reason: {1}".format(
-                    msg_data['message'], msg_data['@ban-reason']), 'FG_notice'
-                ))
+            else: queue.put(("@{0} has been banned. {1}".format(msg_data['message'], reason), 'FG_notice'))
             return None
 
         # The last message type should be PRIVMSG, a regular chat message from a viewer
@@ -203,8 +203,9 @@ class RoboJiub:
             message = "s!temperature {0}".format(message[2:].lower())
             command = "temperature"
 
-        if msg_data['mod'] == '1' or "broadcaster" in msg_data['@badges']:
+        if msg_data['mod'] == '1' or "broadcaster" in msg_data['badges']:
             add_mod(username)
+            print "hey ho"
         elif self.check_mod_only(command):
             return None
 
