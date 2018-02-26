@@ -1,4 +1,4 @@
-from src.config.config import get_config
+from src.config import get_config
 from src.currency.currency import *
 
 def points(args):

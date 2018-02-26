@@ -3,10 +3,15 @@ import json
 import errno
 
 from urllib2 import urlopen, URLError
-from src.config.config import get_config
+from src.config import get_config
 
 global mods
 mods = None
+
+# NOTE - This file is a mess. The name is not descriptive of everything it does.
+# TODO - Move the modlist management somewhere else, probably to moderation.py
+# TODO - Move everything that manages the viewer files into somewhere else.
+#        Leave this file to manage things only related to the currency system.
 
 def get_mods():
     """Get the list of current moderators in the chat."""

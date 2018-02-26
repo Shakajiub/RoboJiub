@@ -7,7 +7,7 @@ import Queue
 import tkFont
 
 from time import localtime, strftime
-from src.config.config import *
+from src.config import *
 
 class RoboGUI:
     def __init__(self, root, queue, irc, end_app, toggle_bot):

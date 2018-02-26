@@ -1,0 +1,11 @@
+{
+    "timeout": [
+        "rudeword",
+        "anotherone",
+        "lastone"
+    ],
+    "ban": [
+        "worstword",
+        "literallyhitler"
+    ]
+}

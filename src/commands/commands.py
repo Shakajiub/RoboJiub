@@ -1,5 +1,5 @@
 import json
-from src.config.config import get_config
+from src.config import get_config
 
 def commands(args):
     """Return a list of all enabled commands for the channel."""

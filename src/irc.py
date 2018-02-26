@@ -2,7 +2,7 @@ import re
 import sys
 import socket
 
-from src.config.config import *
+from src.config import *
 
 class IRC:
     def __init__(self, queue):
@@ -90,8 +90,8 @@ class IRC:
         """Add relevant data to custom bot messages."""
         if message == "cheer" and len(data) == 2:
             text = text.format(user=data[0], bits=data[1])
-        elif message == "sub" and len(data) == 4:
-            text = text.format(user=data[0], streak=data[1], tier=data[2], plan=data[3])
+        elif message == "sub" and len(data) == 5:
+            text = text.format(user=data[0], streak=data[1], tier=data[2], plan=data[3], count=data[4])
         elif message == "raid" and len(data) == 2:
             text = text.format(user=data[0], raiders=data[1])
         return text

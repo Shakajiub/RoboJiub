@@ -7,7 +7,7 @@ import importlib
 from src.irc import *
 from src.gui import *
 from src.commands import *
-from src.config.config import *
+from src.config import *
 from src.currency.currency import get_mods, add_mod, award_all_viewers
 
 class RoboJiub:
@@ -24,6 +24,8 @@ class RoboJiub:
         self.cron_value = 1 # Has to be high enough for cron messages
         self.currency_timer = time.time()
         self.after_loop()
+
+        self.sub_count = 0
 
     def end_application(self):
         """Toggle flags to disconnect the irc socket and close the gui."""
@@ -218,11 +220,13 @@ class RoboJiub:
     def parse_usernotice(self, msg_data, irc, queue):
         """Send back custom messages with relevant data when someone subscribes or raids the channel."""
         if msg_data['msg-id'] == "sub" or msg_data['msg-id'] == "resub":
+            self.sub_count += 1
             irc.send_custom_message("sub", [
                 '@' + msg_data['display-name'].encode('utf-8').lower(), # Subscriber's display name
                 msg_data['msg-param-months'], # Number of consecutive months the user has subscribed for
                 msg_data['msg-param-sub-plan'], # Type of subscription plan (Prime, 1000, 2000, 3000)
-                msg_data['msg-param-sub-plan-name'] # Display name of the subscription plan
+                msg_data['msg-param-sub-plan-name'], # Display name of the subscription plan
+                self.sub_count # Number of subscribers today
             ])
         elif msg_data['msg-id'] == "raid":
             try:
@@ -233,7 +237,7 @@ class RoboJiub:
                         msg_data['msg-param-viewerCount'] # Number of viewers raiding this channel
                     ])
             except KeyError:
-                queue.put(("parse_socket_data() - Message config is corrupted!", 'BG_error'))
+                queue.put(("parse_usernotice() - Message config is corrupted!", 'BG_error'))
 
     def check_command_enabled(self, command, queue):
         """Check if the given command is enabled."""

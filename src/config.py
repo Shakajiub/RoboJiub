@@ -5,6 +5,7 @@ config = None
 
 def get_config(force_reload=False):
     """Get the main json config file. Load it if first time or forced."""
+    # TODO - Don't return the entire config, just a specific value
     global config
     if config == None or force_reload:
         with open('config.json') as config_file:
