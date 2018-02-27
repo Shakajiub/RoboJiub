@@ -64,7 +64,7 @@ def quote(args):
         quotes[num] = '"' + quote + '" [' + date.strftime('%Y-%m-%d') + ']'
 
         with open('quotes.json', 'w') as quotes_file:
-            json.dump(quotes, quotes_file)
+            json.dump(quotes, quotes_file, indent=4)
         return "{0} - Quote #{1} saved!".format(viewer, num)
 
     return None

@@ -126,6 +126,7 @@ class RoboJiub:
             username = parsed_data[0]
             message = parsed_data[1]
             command = parsed_data[2]
+            whisper = parsed_data[3]
 
             if self.check_command_enabled(command, queue) == False:
                 message = "s!custom {0}".format(message[2:])
@@ -133,7 +134,7 @@ class RoboJiub:
 
             args = (queue, username, message.split(' '))
             module = self.get_command_module(command, queue)
-            result = self.get_command_result(module, command, args)
+            result = self.get_command_result(module, command, args, whisper)
             irc.send_message(result)
 
     def parse_socket_data(self, irc, data, queue):
@@ -169,9 +170,15 @@ class RoboJiub:
             else: queue.put(("@{0} has been banned. {1}".format(msg_data['message'], reason), 'FG_notice'))
             return None
 
+        # We can treat a WHISPER as a regular message, except we will also reply with a whisper
+        is_whisper = False
+        if msg_data['type'] == "WHISPER":
+            is_whisper = True
+
         # The last message type should be PRIVMSG, a regular chat message from a viewer
-        if msg_data['type'] != "PRIVMSG":
+        elif msg_data['type'] != "PRIVMSG":
             queue.put(("parse_socket_data() - Unrecognized message type '{0}'!".format(msg_data['type']), 'BG_error'))
+            print(msg_data)
             return None
 
         # Make sure the bot does not ever reply to itself
@@ -182,7 +189,9 @@ class RoboJiub:
             return None
 
         message = msg_data['message'].encode('utf-8')
-        queue.put((message, 'BG_chat', username, msg_data['color'], msg_data['mod'], msg_data['subscriber']))
+        if is_whisper == False:
+            queue.put((message, 'BG_chat', username, msg_data['color'], msg_data['mod'], msg_data['subscriber']))
+        else: queue.put((message, 'BG_whisper', username, msg_data['color'], '', ''))
         self.cron_value = 1 # Tell our cron manager that the chat has user activity
 
         # If the data contains a "bits" key, the chat message is a cheer
@@ -210,12 +219,12 @@ class RoboJiub:
             command = "temperature"
 
         # Since we now receive a user's mod status for every message, we can update the mod list here
-        if msg_data['mod'] == '1' or "broadcaster" in msg_data['badges']:
+        if is_whisper == False and (msg_data['mod'] == '1' or "broadcaster" in msg_data['badges']):
             add_mod(username)
         elif self.check_mod_only(command):
             return None
 
-        return (username, message, command)
+        return [username, message, command, is_whisper]
 
     def parse_usernotice(self, msg_data, irc, queue):
         """Send back custom messages with relevant data when someone subscribes or raids the channel."""
@@ -266,7 +275,7 @@ class RoboJiub:
             queue.put(("get_command_module() - Could not import module '{0}'!".format(command), 'BG_error'))
         return None
 
-    def get_command_result(self, module, command, args):
+    def get_command_result(self, module, command, args, whisper):
         """Return the result (string) from given command in given module."""
         config = get_config()
         queue = args[0]
@@ -274,7 +283,10 @@ class RoboJiub:
             result = getattr(module, command)(args)
             if result == None: # Commands return None if there was an error in the code
                 return None
-            queue.put(("[{0}]: {1}".format(config['irc']['username'], result.encode('utf-8')), 'BG_chat'))
+            if whisper:
+                queue.put(("[{0}]: {1}".format(config['irc']['username'], result.encode('utf-8')), 'BG_whisper'))
+                result = "/w {0} {1}".format(args[1], result)
+            else: ueue.put(("[{0}]: {1}".format(config['irc']['username'], result.encode('utf-8')), 'BG_chat'))
             return result
         except AttributeError:
             queue.put(("get_command_result() - No function found in module '{0}'!".format(command), 'BG_error'))

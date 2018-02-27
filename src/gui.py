@@ -26,6 +26,7 @@ class RoboGUI:
         self.log.configure(state='disabled') # Get input only from code
         self.log.tag_configure('BG_dark', background='#323232')
         self.log.tag_configure('BG_light', background='#3c3c3c')
+        self.log.tag_configure('BG_whisper', background='#282828')
         self.log.tag_configure('BG_error', background='#460000')
         self.log.tag_configure('BG_success', background='#004600')
         self.log.tag_configure('BG_progress', background='#464600')
