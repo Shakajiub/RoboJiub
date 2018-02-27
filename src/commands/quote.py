@@ -3,7 +3,7 @@ import json
 
 from random import choice
 from datetime import datetime
-from src.currency.currency import get_mods
+from src.viewers.viewers import get_mods
 
 def quote(args):
     """Save a quote or reference an old one."""

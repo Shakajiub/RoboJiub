@@ -1,4 +1,5 @@
 from src.config import get_config
+from src.viewers.viewers import *
 from src.currency.currency import *
 
 def points(args):

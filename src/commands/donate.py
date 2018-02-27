@@ -1,3 +1,4 @@
+from src.viewers.viewers import *
 from src.currency.currency import *
 
 def donate(args):

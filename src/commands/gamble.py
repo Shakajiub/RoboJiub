@@ -1,4 +1,5 @@
 from random import randrange
+from src.viewers.viewers import *
 from src.currency.currency import *
 
 def gamble(args):

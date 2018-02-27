@@ -1,3 +1,4 @@
+from src.viewers.viewers import check_viewer_exists
 from src.currency.currency import *
 
 def bonus(args):

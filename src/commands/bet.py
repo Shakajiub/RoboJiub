@@ -1,4 +1,5 @@
-from src.currency.currency import get_mods, award_viewer
+from src.viewers.viewers import get_mods
+from src.currency.currency import award_viewer
 
 global bets
 bets = None
