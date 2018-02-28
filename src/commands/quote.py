@@ -19,7 +19,7 @@ def quote(args):
             quotes = json.load(quotes_file)
     except Exception:
         queue.put(("{0}".format(sys.exc_info()[0]), 'BG_error'))
-        queue.put(("quotes() - Could not load json!", 'BG_error'))
+        queue.put(("quote() - Could not load json!", 'BG_error'))
         return None
 
     response = "Sorry, I could not find that quote."
@@ -61,10 +61,10 @@ def quote(args):
 
         num = len(quotes)
         date = datetime.now()
-        quotes[num] = '"' + quote + '" [' + date.strftime('%Y-%m-%d') + ']'
+        quotes[num] = "\"{0}\" [{1}]".format(quote, date.strftime('%Y-%m-%d'))
 
         with open('quotes.json', 'w') as quotes_file:
-            json.dump(quotes, quotes_file, indent=4)
+            json.dump(quotes, quotes_file, indent=4, sort_keys=True)
         return "{0} - Quote #{1} saved!".format(viewer, num)
 
     return None

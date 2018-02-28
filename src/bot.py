@@ -170,7 +170,7 @@ class RoboJiub:
             else: queue.put(("@{0} has been banned. {1}".format(msg_data['message'], reason), 'FG_notice'))
             return None
 
-        # We can treat a WHISPER as a regular message, except we will also reply with a whisper
+        # We can treat a WHISPER like a regular message, except we will also reply with a whisper
         is_whisper = False
         if msg_data['type'] == "WHISPER":
             is_whisper = True
@@ -286,7 +286,7 @@ class RoboJiub:
             if whisper:
                 queue.put(("[{0}]: {1}".format(config['irc']['username'], result.encode('utf-8')), 'BG_whisper'))
                 result = "/w {0} {1}".format(args[1], result)
-            else: ueue.put(("[{0}]: {1}".format(config['irc']['username'], result.encode('utf-8')), 'BG_chat'))
+            else: queue.put(("[{0}]: {1}".format(config['irc']['username'], result.encode('utf-8')), 'BG_chat'))
             return result
         except AttributeError:
             queue.put(("get_command_result() - No function found in module '{0}'!".format(command), 'BG_error'))

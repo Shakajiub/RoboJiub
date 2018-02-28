@@ -2,6 +2,7 @@ import os
 import json
 import errno
 
+from datetime import datetime
 from src.config import get_config
 
 global mods
@@ -18,7 +19,7 @@ def add_mod(username):
     """Append the given username to the moderator list."""
     global mods
     if mods == None:
-        mods = ["shakajiub", "robojiub"]
+        mods = ["shakajiub"]
     if username not in mods:
         mods.append(username)
 
@@ -44,6 +45,9 @@ def create_viewer(viewer, queue, bonus=0):
             except KeyError:
                 queue.put(("create_viewer() - Currency config is corrupted!", 'BG_error'))
                 data = { 'currency': bonus }
+            date = datetime.now()
+            data['created'] = date.strftime('%Y-%m-%d')
+            data['warnings'] = 0
             json.dump(data, f)
     except IOError:
         queue.put(("create_viewer() - Could not create json file for '{0}'!".format(viewer), 'BG_error'))

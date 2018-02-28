@@ -7,8 +7,8 @@
         "oauth_password": "oauth:"
     },
     "messages": {
-        "greeting": { "enabled": true,  "msg": "RoboJiub activated VoHiYo" },
-        "goodbye":  { "enabled": true,  "msg": "RoboJiub deactivated VoHiYo" },
+        "greeting": { "enabled": false, "msg": "RoboJiub activated VoHiYo" },
+        "goodbye":  { "enabled": false, "msg": "RoboJiub deactivated VoHiYo" },
         "sub":      { "enabled": true,  "msg": "Thank you for subscribing {user} !!! VoHiYo (tier: {tier}, {streak} month streak) (today's subs: {count})" },
         "cheer":    { "enabled": true,  "limit": 0, "msg": "Thank you for the cheer {user} !!! VoHiYo ({bits} bits)" },
         "raid":     { "enabled": true,  "limit": 0, "msg": "Thank you for the raid {user} !!! VoHiYo ({raiders} raiders)" }
@@ -45,6 +45,8 @@
         "bet":         { "enabled": true,  "mod_only": false },
         "quote":       { "enabled": true,  "mod_only": false },
         "ddg":         { "enabled": true,  "mod_only": true  },
-        "commands":    { "enabled": true,  "mod_only": false }
+        "commands":    { "enabled": true,  "mod_only": false },
+        "command":     { "enabled": true,  "mod_only": true  },
+        "stats":       { "enabled": true,  "mod_only": false }
     }
 }
