@@ -1,6 +1,6 @@
-import sys
 import json
 
+from sys import exc_info
 from random import choice
 from datetime import datetime
 from src.viewers.viewers import get_mods
@@ -18,7 +18,7 @@ def quote(args):
         with open('quotes.json', 'r') as quotes_file:
             quotes = json.load(quotes_file)
     except Exception:
-        queue.put(("{0}".format(sys.exc_info()[0]), 'BG_error'))
+        queue.put(("{0}".format(exc_info()[0]), 'BG_error'))
         queue.put(("quote() - Could not load json!", 'BG_error'))
         return None
 

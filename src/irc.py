@@ -39,6 +39,7 @@ class IRC:
             params = data[0][1:].split(';')
             for param in params:
                 p = param.split('=')
+                # NOTE - This gave an index error on something, possibly when the stream ended in a raid
                 msg_data[p[0]] = p[1]
 
             if len(data) > 2:
