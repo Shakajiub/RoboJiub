@@ -12,11 +12,16 @@ def bonus(args):
     viewer = args[1]
     message = args[2]
 
-    if not message[2].isdigit():
+    if message[2][0] == '-':
+        if not message[2][1:].isdigit():
+            return "@{0} - Invalid amount.".format(viewer)
+    elif not message[2].isdigit():
         return "@{0} - Invalid amount.".format(viewer)
 
     recipient = message[1].lower()
-    donation_amount = int(message[2])
+    if recipient[0] == '@':
+        recipient = recipient[1:]
+    bonus_amount = int(message[2])
 
     if not check_viewer_exists(recipient):
         return "@{0} - Cannot find bonus target.".format(viewer)
@@ -25,7 +30,11 @@ def bonus(args):
     if not currency_name:
         return None # None is returned on internal errors
 
-    award_viewer(recipient, donation_amount, queue)
+    award_viewer(recipient, bonus_amount, queue)
+    if bonus_amount < 0:
+        return "@{0} - Removed {1} {2}{3} from @{4}.".format(
+            viewer, '{:,}'.format(bonus_amount), currency_name, "s" if bonus_amount != 1 else "", recipient
+        )
     return "@{0} - Awarded {1} {2}{3} to @{4}!".format(
-        viewer, '{:,}'.format(donation_amount), currency_name, "s" if donation_amount != 1 else "", recipient
+        viewer, '{:,}'.format(bonus_amount), currency_name, "s" if bonus_amount != 1 else "", recipient
     )

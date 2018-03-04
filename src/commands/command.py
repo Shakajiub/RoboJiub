@@ -24,6 +24,8 @@ def command(args):
 
     key = message[2]
 
+    # Example: "s!command add hello Hello world!"
+    # This will create the command "s!hello", which will return "Hello world!"
     if message[1] == "add":
         if len(message) < 4:
             return usage
@@ -31,6 +33,8 @@ def command(args):
             return '@{0} - The command "{1}" already exists. Use "s!command edit (...)" to modify it.'.format(viewer, key)
         return add_command(cmds, key, message, viewer)
 
+    # Example: "s!command edit hello yo yo yo"
+    # Now the "s!hello" command will return "yo yo yo"
     elif message[1] == "edit":
         if len(message) < 4:
             return usage
@@ -38,6 +42,8 @@ def command(args):
             return '@{0} - Cannot find that command. Use "s!command add (...)" to create it.'.format(viewer)
         return add_command(cmds, key, message, viewer)
 
+    # Example: "s!command remove hello"
+    # And the command is no more
     elif message[1] == "remove":
         if key not in cmds:
             return "@{0} - Cannot find that command. It's already gone!".format(viewer)
@@ -49,8 +55,9 @@ def command(args):
     return usage
 
 def add_command(cmds, key, message, viewer):
+    """Add the given key/message into the commands json and dump it."""
     del message[0] # "s!command"
-    del message[0] # "add"
+    del message[0] # "add/edit"
     del message[0] # "(cmd)"
     value = " ".join(message)
 

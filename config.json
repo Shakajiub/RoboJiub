@@ -24,6 +24,7 @@
     "moderation": {
         "enabled": true,
         "allow_links": "subs",
+        "allow_caps": true,
         "warnings": 1
     },
     "cron": {
@@ -37,7 +38,7 @@
         "points":      { "enabled": true,  "mod_only": false },
         "gamble":      { "enabled": true,  "mod_only": false },
         "donate":      { "enabled": true,  "mod_only": false },
-        "question":    { "enabled": true,  "mod_only": false },
+        "question":    { "enabled": false, "mod_only": false },
         "roll":        { "enabled": true,  "mod_only": false },
         "bonus":       { "enabled": true,  "mod_only": true  },
         "gettime":     { "enabled": true,  "mod_only": false },

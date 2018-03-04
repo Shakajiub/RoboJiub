@@ -16,6 +16,8 @@ def donate(args):
         return "@{0} - Invalid amount.".format(viewer)
 
     recipient = message[1].lower()
+    if recipient[0] == '@':
+        recipient = recipient[1:]
     donation_amount = int(message[2])
 
     if not check_viewer_exists(recipient):

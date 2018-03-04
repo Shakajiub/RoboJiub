@@ -5,6 +5,8 @@ def stats(args):
     """Return all information we have for the caller."""
     #usage = "usage: s!stats (viewer)"
 
+    # TODO - Return some unique info when returning stats for the bot
+
     queue = args[0]
     viewer = args[1]
     target = viewer
